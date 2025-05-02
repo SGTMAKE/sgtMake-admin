@@ -1,0 +1,255 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                String  @id @default(auto()) @map("_id") @db.ObjectId
+  providerAccountId String
+  userId            String  @db.ObjectId
+  expires_at        Int?
+  provider          String
+  session_state     String?
+  type              String
+  access_token      String?
+  id_token          String?
+  refresh_token     String?
+  scope             String?
+  token_type        String?
+  user              User    @relation(fields: [userId], references: [id])
+
+  @@unique([provider, providerAccountId])
+}
+
+model Address {
+  id               String  @id @default(auto()) @map("_id") @db.ObjectId
+  name             String
+  phone            String?
+  address          String
+  district         String
+  state            String
+  pincode          String
+  landmark         String?
+  alternate_phone  String?
+  is_default       Boolean @default(true)
+  is_deleted       Boolean @default(false)
+  userId           String  @db.ObjectId
+  locality         String
+  user             User    @relation(fields: [userId], references: [id])
+  order            Order[]
+
+  @@index([userId])
+}
+
+model Admin {
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
+  name     String
+  email    String  @unique
+  password String
+  role     String
+
+  @@map("admin") // Map to the correct MongoDB collection name
+}
+
+model BestDeal {
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  imageUrl    String
+  title       String
+  description String
+  url         String
+  price       Float
+}
+
+model Cart {
+  id          String      @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String?     @db.ObjectId 
+  guestUserId String?     @db.ObjectId 
+  guestUser   GuestUser?  @relation(fields: [guestUserId], references: [id])
+  User        User?       @relation(fields: [userId], references: [id])
+ cartItems CartItem[] 
+ @@unique([userId])
+@@unique([guestUserId])
+
+}
+model CartItem {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  productId     String?  @db.ObjectId // optional if using custom product
+  customProduct CustomProductJson?    // JSON field to store customized product
+  quantity      Int
+  cartId        String   @db.ObjectId
+  color         String?
+  cart          Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product       Product? @relation(fields: [productId], references: [id])
+
+  @@index([cartId])
+}
+type CustomProductJson {
+  title      String
+  basePrice  Float
+  offerPrice Float
+  image      String
+  options    Json // options can be dynamic key-value pairs
+}
+
+
+model Category {
+  id       String      @id @default(auto()) @map("_id") @db.ObjectId
+  name     String
+  parentId String?     @db.ObjectId
+  parent   Category?   @relation("Category", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Category Category[]  @relation("Category")
+  Product  Product[]
+}
+
+model GuestUser {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  expirationDate DateTime
+  cart           Cart?
+}
+
+model HeroBanner {
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String
+  basePrice   Float
+  offerPrice  Float
+  url         String
+  imageUrl    String
+  imageUrlSm  String
+}
+
+model Image {
+  id            String  @id @default(auto()) @map("_id") @db.ObjectId
+  imagePublicId String
+  productId     String  @db.ObjectId
+  Product       Product @relation(fields: [productId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([productId, id])
+}
+
+model Order {
+  id               String      @id @default(auto()) @map("_id") @db.ObjectId
+  orderID   String   @unique
+  orderDate        DateTime    @default(now())
+  packedDate       DateTime?
+  deliveredDate    DateTime?
+  total            Float
+  userId           String      @db.ObjectId
+  payment_verified Boolean     @default(false)
+  status           String      @default("pending")
+  addressId        String      @db.ObjectId
+  address          Address     @relation(fields: [addressId], references: [id])
+  user             User        @relation(fields: [userId], references: [id])
+  orderItems        OrderItem[]
+  payment          Payment?
+}
+
+model OrderItem {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  productId     String?  @db.ObjectId // Made optional to support custom products
+  quantity      Int
+  color         String?
+  orderId       String   @db.ObjectId
+  basePrice     Float
+  offerPrice    Float
+  customProduct CustomProductJson?    // JSON field to store custom product data
+  order         Order    @relation(fields: [orderId], references: [id])
+  product       Product? @relation(fields: [productId], references: [id], onDelete: NoAction, onUpdate: NoAction) // Made optional
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+model Payment {
+  id             String  @id @default(auto()) @map("_id") @db.ObjectId
+  rzr_order_id   String  @unique
+  rzr_payment_id String  @unique
+  orderId        String  @db.ObjectId @unique
+  amount         Float
+  method         String
+  via            String
+  order          Order   @relation(fields: [orderId], references: [id])
+}
+
+model Product {
+  id               String      @id @default(auto()) @map("_id") @db.ObjectId
+  slug             String
+  title            String
+  description      String
+  categoryId       String      @db.ObjectId
+  basePrice        Float
+  offerPrice       Float
+  stock            Int
+  color            String?
+  variantName      String?
+  variantValues    String?
+  createdAt        DateTime    @default(now())
+  shortDescription String?
+  purchases        Int         @default(0)
+  keywords         String[]
+  earnings         Float       @default(0)
+  cartItems         CartItem[]
+  images            Image[]
+  orderItems        OrderItem[]
+  category         Category    @relation(fields: [categoryId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([slug])
+}
+
+model Session {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  expires      DateTime
+  sessionToken String   @unique
+  userId       String   @db.ObjectId
+  user         User     @relation(fields: [userId], references: [id])
+}
+
+model User {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  email         String    @unique
+  gender        String?
+  phone         String?
+  password      String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  lastLogin     DateTime  @default(now())
+  image         String?
+  emailVerified DateTime?
+  accounts       Account[]
+  addresses       Address[]
+  cart          Cart?
+  order         Order[]
+  sessions       Session[]
+}
+
+model VerificationToken {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model MarqueeOffers {
+  id    String  @id @default(auto()) @map("_id") @db.ObjectId
+  title String
+  url   String
+}
+model Service {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String   @db.ObjectId
+  fileUrl     String?
+  fileType   String?
+  filePublicId String?  // Cloudinary public_id
+  formDetails Json     // Key-value pairs for different service forms
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("services")
+}
