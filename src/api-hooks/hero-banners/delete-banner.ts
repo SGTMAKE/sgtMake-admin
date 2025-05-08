@@ -6,7 +6,7 @@ export async function handleDelete({
   id,
   publicId,
 }: {
-  id: number;
+  id: string;
   publicId: string;
 }) {
   const { data: result } = await axios.delete(

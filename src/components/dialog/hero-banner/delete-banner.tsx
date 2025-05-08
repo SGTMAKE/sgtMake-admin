@@ -18,7 +18,7 @@ const DeleteHeroBanner = ({
   setBannerData,
   publicId,
 }: {
-  id: number;
+  id: string;
   setBannerData: Dispatch<SetStateAction<HeroBanner[] | null>>;
   publicId: string;
 }) => {

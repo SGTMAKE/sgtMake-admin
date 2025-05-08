@@ -10,7 +10,7 @@ async function handleUpdate({
   values,
   images,
 }: {
-  id: number;
+  id: string;
   values: z.infer<typeof ZodHeroBannerSchema>;
   images: { image: string; imageSm: string };
 }) {
