@@ -36,7 +36,7 @@ const ProductTemplate = ({ product, searchParams }: ProductTemplateProps) => {
   return (
     <div className="relative mx-auto flex w-full max-w-[1440px] flex-col justify-evenly md:flex-row md:items-start">
       <div className="flex w-full flex-col gap-y-5 md:sticky md:top-28 md:w-[50%]">
-        <ImageGallery images={variant.images!} />
+        <ImageGallery images={variant.images} />
       </div>
       <div className="flex w-full flex-col gap-y-1 py-8 md:sticky md:top-20 md:max-w-[344px] md:py-0 lg:max-w-[500px]">
         <h1 className="text-xl font-medium md:text-2xl">{product.title}</h1>
