@@ -42,6 +42,7 @@ export async function GET() {
 
     return success200({ orders: formattedOrders });
   } catch (error) {
+    console.log(error);
     return error500({});
   }
 }

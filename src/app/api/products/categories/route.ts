@@ -62,8 +62,9 @@ export async function POST(req: NextRequest) {
     if (result.success) {
       await db.category.create({
         data: {
-          name: data.category,
-          parentId: Number(data.parentId),
+          name: data.category || "",
+          parentId: data.parentId || null,
+          description: data.description || "",
         },
       });
       return success200({});
@@ -72,6 +73,7 @@ export async function POST(req: NextRequest) {
       return error400("Invalid data format.", {});
     }
   } catch (error) {
+    console.log(error);
     return error500({ product: null });
   }
 }
@@ -95,7 +97,7 @@ export async function DELETE(req: NextRequest) {
 
     await db.category.delete({
       where: {
-        id: Number(cid),
+        id: cid,
       },
     });
 
@@ -120,7 +122,7 @@ export async function PUT(req: NextRequest) {
 
     const data:
       | {
-          id: number;
+          id: string;
           values: z.infer<typeof ZodCategorySchema>;
         }
       | undefined = await req.json();
@@ -136,7 +138,8 @@ export async function PUT(req: NextRequest) {
         },
         data: {
           name: data.values.category,
-          parentId: Number(data.values.parentId),
+          parentId: data.values.parentId,
+          description: data.values.description,
         },
       });
 

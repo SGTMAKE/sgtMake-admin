@@ -20,13 +20,13 @@ model Account {
   refresh_token     String?
   scope             String?
   token_type        String?
-  user              User    @relation(fields: [userId], references: [id])
+  User              User    @relation(fields: [userId], references: [id])
 
   @@unique([provider, providerAccountId])
 }
 
 model Address {
-  id               String  @id @default(auto()) @map("_id") @db.ObjectId
+  address_id               String  @id @default(auto()) @map("_id") @db.ObjectId
   name             String
   phone            String?
   address          String
@@ -39,8 +39,8 @@ model Address {
   is_deleted       Boolean @default(false)
   userId           String  @db.ObjectId
   locality         String
-  user             User    @relation(fields: [userId], references: [id])
-  order            Order[]
+  User             User    @relation(fields: [userId], references: [id])
+  Order            Order[]
 
   @@index([userId])
 }
@@ -65,15 +65,12 @@ model BestDeal {
 }
 
 model Cart {
-  id          String      @id @default(auto()) @map("_id") @db.ObjectId
-  userId      String?     @db.ObjectId 
-  guestUserId String?     @db.ObjectId 
-  guestUser   GuestUser?  @relation(fields: [guestUserId], references: [id])
-  User        User?       @relation(fields: [userId], references: [id])
- cartItems CartItem[] 
- @@unique([userId])
-@@unique([guestUserId])
-
+  id           String      @id @default(auto()) @map("_id") @db.ObjectId
+  userId       String?     @unique @db.ObjectId
+  guestUserId  String?     @unique @db.ObjectId
+  guestUser    GuestUser?  @relation(fields: [guestUserId], references: [id])
+  User         User?       @relation(fields: [userId], references: [id])
+  cartItems    CartItem[]
 }
 model CartItem {
   id            String   @id @default(auto()) @map("_id") @db.ObjectId
@@ -82,10 +79,8 @@ model CartItem {
   quantity      Int
   cartId        String   @db.ObjectId
   color         String?
-  cart          Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
-  product       Product? @relation(fields: [productId], references: [id])
-
-  @@index([cartId])
+  Cart          Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  Product       Product? @relation(fields: [productId], references: [id])
 }
 type CustomProductJson {
   title      String
@@ -103,12 +98,13 @@ model Category {
   parent   Category?   @relation("Category", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   Category Category[]  @relation("Category")
   Product  Product[]
+  description String?
 }
 
 model GuestUser {
   id             String   @id @default(auto()) @map("_id") @db.ObjectId
   expirationDate DateTime
-  cart           Cart?
+  Cart           Cart?
 }
 
 model HeroBanner {
@@ -142,10 +138,10 @@ model Order {
   payment_verified Boolean     @default(false)
   status           String      @default("pending")
   addressId        String      @db.ObjectId
-  address          Address     @relation(fields: [addressId], references: [id])
-  user             User        @relation(fields: [userId], references: [id])
-  orderItems        OrderItem[]
-  payment          Payment?
+  Address          Address     @relation(fields: [addressId], references: [address_id])
+  User             User        @relation(fields: [userId], references: [id])
+  OrderItem        OrderItem[]
+  Payment          Payment?
 }
 
 model OrderItem {
@@ -157,8 +153,8 @@ model OrderItem {
   basePrice     Float
   offerPrice    Float
   customProduct CustomProductJson?    // JSON field to store custom product data
-  order         Order    @relation(fields: [orderId], references: [id])
-  product       Product? @relation(fields: [productId], references: [id], onDelete: NoAction, onUpdate: NoAction) // Made optional
+  Order         Order    @relation(fields: [orderId], references: [id])
+  Product       Product? @relation(fields: [productId], references: [id], onDelete: NoAction, onUpdate: NoAction) // Made optional
 
   @@index([orderId])
   @@index([productId])
@@ -172,7 +168,7 @@ model Payment {
   amount         Float
   method         String
   via            String
-  order          Order   @relation(fields: [orderId], references: [id])
+  Order          Order   @relation(fields: [orderId], references: [id])
 }
 
 model Product {
@@ -192,10 +188,10 @@ model Product {
   purchases        Int         @default(0)
   keywords         String[]
   earnings         Float       @default(0)
-  cartItems         CartItem[]
-  images            Image[]
-  orderItems        OrderItem[]
-  category         Category    @relation(fields: [categoryId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  CartItem         CartItem[]
+  Image            Image[]
+  OrderItem       OrderItem[]
+  Category         Category    @relation(fields: [categoryId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([slug])
 }
@@ -205,7 +201,7 @@ model Session {
   expires      DateTime
   sessionToken String   @unique
   userId       String   @db.ObjectId
-  user         User     @relation(fields: [userId], references: [id])
+  User         User     @relation(fields: [userId], references: [id])
 }
 
 model User {
@@ -220,11 +216,12 @@ model User {
   lastLogin     DateTime  @default(now())
   image         String?
   emailVerified DateTime?
-  accounts       Account[]
-  addresses       Address[]
-  cart          Cart?
-  order         Order[]
-  sessions       Session[]
+  Accounts       Account[]
+  Addresses       Address[]
+  Cart          Cart?
+  Order         Order[]
+  Sessions       Session[]
+  services      Service[]
 }
 
 model VerificationToken {
@@ -244,12 +241,14 @@ model MarqueeOffers {
 model Service {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   userId      String   @db.ObjectId
-  fileUrl     String?
-  fileType   String?
-  filePublicId String?  // Cloudinary public_id
+  user         User     @relation(fields: [userId], references: [id])
+  fileUrl     String
+  fileType   String
+  filePublicId String  // Cloudinary public_id
   formDetails Json     // Key-value pairs for different service forms
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  
 
   @@map("services")
 }

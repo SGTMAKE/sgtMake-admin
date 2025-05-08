@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 
 async function getProductsClient(page = 1) {
   const { data } = await axios.get("/api/products", { params: { page } });
+  console.log(data)
   return data as ProductsResProps;
 }
 

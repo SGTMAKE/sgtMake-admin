@@ -18,6 +18,7 @@ const columns = [
   { name: "ID", uid: "id" },
   { name: "CATEGORY", uid: "name" },
   { name: "PARENT ID", uid: "parentId" },
+  { name: "DESCRIPTION", uid: "description" },
   { name: "PRODUCTS", uid: "_count" },
   { name: "ACTIONS", uid: "actions" },
 ];
@@ -34,6 +35,8 @@ export default function CategoriesTable() {
           return cellValue === null ? "NULL" : cellValue;
         case "_count":
           return cellValue === 0 ? "" : cellValue;
+        case "description":
+          return cellValue === "" ? "No description" : <p className="line-clamp-1">{cellValue}</p>;
         case "actions":
           return (
             <div className="relative flex items-center gap-2">

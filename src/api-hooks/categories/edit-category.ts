@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 interface UpdateAdminProps {
-  id: number;
+  id: string;
   values: z.infer<typeof ZodCategorySchema>;
 }
 

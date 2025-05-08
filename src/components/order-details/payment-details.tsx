@@ -3,7 +3,7 @@ import { Card, CardBody } from "@nextui-org/react";
 import { CreditCard } from "lucide-react";
 
 type PaymentDetailsProps = {
-  id: number;
+  id: string;
   rzr_order_id: string | null;
   rzr_payment_id: string | null;
   orderId: string;

@@ -109,7 +109,7 @@ export async function POST(req: NextRequest) {
           basePrice: parseInt(data.basePrice),
           offerPrice: parseInt(data.offerPrice),
           stock: parseInt(data.stock),
-          categoryId: parseInt(data.categoryId),
+          categoryId: data.categoryId,
           color: extractColorAsString(data.colors),
           variantName: data.variantName,
           variantValues: data.variantValues?.replace(/\s/g, ""),
@@ -128,6 +128,7 @@ export async function POST(req: NextRequest) {
       return error400("Invalid data format.", {});
     }
   } catch (error) {
+    console.log(error)
     return error500({ product: null });
   }
 }

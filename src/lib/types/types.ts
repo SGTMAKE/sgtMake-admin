@@ -85,7 +85,7 @@ type Address = Omit<
   Omit<Omit<AddressPrisma, "address_id">, "userId">,
   "alternate_phone"
 > & {
-  id: number;
+  id: string;
   user_id: string;
   alt_phone: string;
 };
@@ -105,7 +105,13 @@ type OrderProps = Omit<
 };
 
 type OrderItemProps = OrderItem & { title: string; Image: string };
-
+export interface CustomProduct {
+  title: string
+  basePrice: number
+  offerPrice: number
+  image: string
+  options: Record<string, any>    
+}
 type SingleOrder = Order & {
   Address: Address;
   Payment: Payment;
@@ -117,6 +123,7 @@ type SingleOrder = Order & {
     image: string | null;
   };
   OrderItem: OrderItemProps[];
+  customProduct: CustomProduct;
 };
 
 type SingleOrderResProps = Res & {
@@ -196,9 +203,10 @@ type EditProductResProps = Res & {
 };
 
 interface Category {
-  id: number;
+  id: string;
   name: string;
-  parentId: number | null;
+  parentId?: string | null;
+  description?: string | null;
   _count?: number;
 }
 
@@ -219,7 +227,7 @@ type ColorVariantReturn = {
     url: string | undefined;
   };
   others: {
-    id: number;
+    id: string;
     url: string;
   }[];
 };

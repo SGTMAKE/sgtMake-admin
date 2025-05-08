@@ -82,7 +82,7 @@ export default function ProductsTable() {
   }, [visibleColumns]);
 
   const filteredItems = React.useMemo(() => {
-    let filteredProducts = [...data?.products!];
+    let filteredProducts = data?.products ? [...data.products] : [];
 
     if (hasSearchFilter) {
       filteredProducts = filteredProducts.filter((product) =>

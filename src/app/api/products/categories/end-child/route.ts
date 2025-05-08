@@ -11,13 +11,26 @@ export async function GET() {
       return error401("Unauthorized");
     }
 
-    const categories =
-      await db.$queryRaw`SELECT * FROM "Category" WHERE id NOT IN (
-  SELECT DISTINCT "parentId" FROM "Category" WHERE "parentId" IS NOT NULL
-) ORDER BY name;`;
+    const parentIdDocs = await db.category.findMany({
+      where: { parentId: { not: null } },
+      select: { parentId: true },
+      distinct: ["parentId"], // Get unique parent IDs
+      
+    });
+    
+    // Extract unique parent IDs and filter out nulls
+    const parentIds = parentIdDocs.map(doc => doc.parentId).filter((id): id is string => id !== null);
+    
+    // Get categories that are NOT parents
+    const categories = await db.category.findMany({
+      where: { id: { notIn: parentIds } },
+      orderBy: { name: "asc" },
+      select: { parentId: true ,name:true,id:true}
+    });
     if (!categories) return error500({ categories: null });
     return success200({ categories });
   } catch (error) {
+
     return error500({ categories: null });
   }
 }

@@ -117,8 +117,26 @@ export async function PUT(
 
         await cloudinary.api.delete_folder(`products/${dbProduct.slug}`);
 
-        // Update database records in bulk
-        await db.$queryRaw`UPDATE "Image" SET "imagePublicId" = REPLACE("imagePublicId", ${dbProduct.slug}, ${data.slug}) WHERE "productId" = ${pid}`;
+        const images = await db.image.findMany({
+          where: {
+            productId: pid,
+            imagePublicId: {
+              contains: dbProduct.slug, // ensures the slug exists in the field
+            },
+          },
+        });
+        
+        // 2. Update each one with the replaced string
+        await Promise.all(
+          images.map((img) =>
+            db.image.update({
+              where: { id: img.id },
+              data: {
+                imagePublicId: img.imagePublicId.replace(dbProduct.slug, data.slug),
+              },
+            })
+          )
+        );
       }
       await db.product.update({
         where: {
@@ -133,7 +151,7 @@ export async function PUT(
           basePrice: parseInt(data.basePrice),
           offerPrice: parseInt(data.offerPrice),
           stock: parseInt(data.stock),
-          categoryId: parseInt(data.categoryId),
+          categoryId: data.categoryId,
           variantName: data.variantName,
           variantValues: data.variantValues?.replace(/\s/g, ""),
           keywords: data.keywords.replace(/\s/g, "").split(","),

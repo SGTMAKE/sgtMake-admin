@@ -70,11 +70,8 @@ export const ZodProductSchema = z.object({
     .optional(),
   description: z
     .string()
-    .min(10, "Value must be 10 or more characters long")
     .max(1000, "Value must be less than 1000 characters long"),
-  categoryId: z.string().refine((value) => /^\d+$/.test(value), {
-    message: "invalid category id",
-  }),
+  categoryId: z.string(),
   basePrice: z.string().refine((value) => /^\d+$/.test(value), {
     message: "Enter valid number",
   }),
@@ -105,8 +102,9 @@ export const ZodProductSchema = z.object({
 });
 
 export const ZodCategorySchema = z.object({
-  category: z.string(),
-  parentId: z.string(),
+  category: z.string().min(1, "Category name is required"),
+  parentId: z.string().optional(),
+  description: z.string().optional(),
 });
 
 export const ZodBestDealSchema = z.object({

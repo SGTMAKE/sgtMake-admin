@@ -12,7 +12,7 @@ import {
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
-const DeleteCategory = ({ id }: { id: number }) => {
+const DeleteCategory = ({ id }: { id: string }) => {
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
 
   const onSuccess = () => {

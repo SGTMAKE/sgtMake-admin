@@ -86,7 +86,7 @@ const Sidebar = () => {
         animate={open ? "open" : "closed"}
         className="text-gray fixed z-[49] h-screen w-[16rem] max-w-[16rem] overflow-hidden bg-white dark:bg-dark lg:relative"
       >
-        <div className="mx-3.5 flex items-center gap-4 py-3 font-medium">
+        <div className="mx-3.5 flex items-center gap-4 py-3 font-medium italic">
           <Image
             src="/icon.png"
             className="flex-shrink-0"
@@ -95,7 +95,7 @@ const Sidebar = () => {
             height={45}
             style={{ width: "auto", height: "auto" }}
           />
-          <span className="whitespace-pre text-xl">GadgeXhub</span>
+          <p className="whitespace-pre text-xl"><span className="font-bold text-orange-600 text-2xl">S</span><span className="uppercase">gt</span><span className="font-bold text-orange-600 text-2xl">M</span>ake</p>
         </div>
 
         <div className="flex h-full flex-col pb-32">
@@ -124,7 +124,7 @@ const Sidebar = () => {
                   <p className="ml-5 flex-1 text-left capitalize">Orders</p>
                 </Link>
               </li>
-              <li>
+              {/* <li>
                 <Link
                   href="/dashboard/revenue"
                   className={`${
@@ -134,7 +134,7 @@ const Sidebar = () => {
                   <Wallet size={23} className="min-w-max" />
                   <p className="ml-5 flex-1 text-left capitalize">Revenue</p>
                 </Link>
-              </li>
+              </li> */}
               <SubMenu
                 isOpen={open}
                 data={{
@@ -170,7 +170,7 @@ const Sidebar = () => {
                   </p>
                 </Link>
               </li>
-              <li>
+              {/* <li>
                 <Link
                   href="/dashboard/site-traffic"
                   className={`${
@@ -180,6 +180,17 @@ const Sidebar = () => {
                 >
                   <BarChart3 size={23} className="min-w-max" />
                   Site Traffic
+                </Link>
+              </li> */}
+              <li>
+                <Link
+                  href="/dashboard/services"
+                  className={`${
+                    pathname === "/dashboard/services" && "text-primary"
+                  } flex cursor-default items-center justify-start rounded-md bg-transparent p-3 font-medium outline-none duration-300 md:cursor-pointer`}
+                >
+                  <Boxes size={23} className="min-w-max" />
+                  <p className="ml-5 flex-1 text-left capitalize">Services</p>
                 </Link>
               </li>
             </div>

@@ -1,26 +1,23 @@
-import { authOptions } from "@/lib/auth";
-import { db } from "@/lib/prisma";
-import { error400, error401, error500, success200 } from "@/lib/utils";
-import { getServerSession } from "next-auth";
-import { NextRequest } from "next/server";
+import { authOptions } from "@/lib/auth"
+import { db } from "@/lib/prisma"
+import { error400, error401, error500, success200 } from "@/lib/utils"
+import { getServerSession } from "next-auth"
+import type { NextRequest } from "next/server"
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { oid: string } },
-) {
+export async function GET(req: NextRequest, { params }: { params: { oid: string } }) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession(authOptions)
 
     if (!session || !session.user || !session.user.id) {
-      return error401("Unauthorized");
+      return error401("Unauthorized")
     }
 
-    const isGuest = session.user.role === "GUEST";
+    const isGuest = session.user.role === "GUEST"
 
-    const orderId = params.oid;
+    const orderId = params.oid
 
     if (!orderId) {
-      return error400("Invalid data format.", {});
+      return error400("Invalid data format.", {})
     }
     const order = await db.order.findUnique({
       where: {
@@ -40,9 +37,9 @@ export async function GET(
         Payment: true,
         User: true,
       },
-    });
+    })
 
-    if (!order) return success200({ order: null });
+    if (!order) return success200({ order: null })
 
     return success200({
       order: {
@@ -63,9 +60,7 @@ export async function GET(
           image: order.User.image,
         },
         Address: order.Address,
-        Payment: isGuest
-          ? { ...order.Payment, rzr_order_id: null, rzr_payment_id: null }
-          : order.Payment,
+        Payment: isGuest ? { ...order.Payment, rzr_order_id: null, rzr_payment_id: null } : order.Payment,
         OrderItem: order.OrderItem.map((item) => ({
           id: item.id,
           productId: item.productId,
@@ -74,14 +69,14 @@ export async function GET(
           orderId: item.orderId,
           basePrice: item.basePrice,
           offerPrice: item.offerPrice,
-          title: item.Product.title,
-          Image: item.Product.Image.find((image) =>
-            image.imagePublicId.endsWith("-thumb"),
-          )?.imagePublicId,
+          title: item.Product ? item.Product.title : item.customProduct?.title,
+          Image: item.Product ? item.Product.Image.find((image) => image.imagePublicId.endsWith("-thumb"))?.imagePublicId : item.customProduct?.image,
+          customProduct: item.customProduct,
         })),
       },
-    });
+    })
   } catch (error) {
-    return error500({});
+    console.log(error)
+    return error500({})
   }
 }
