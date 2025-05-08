@@ -5,7 +5,7 @@ import { useState } from "react";
 
 type ImageGalleryProps = {
   images: {
-    id: number;
+    id: string;
     url: string;
   }[];
 };
