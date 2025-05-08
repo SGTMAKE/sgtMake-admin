@@ -10,7 +10,7 @@ async function handleUpdate({
   values,
   imageUrl,
 }: {
-  id: number;
+  id: string;
   values: z.infer<typeof ZodBestDealSchema>;
   imageUrl: string;
 }) {

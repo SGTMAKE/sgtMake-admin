@@ -2,7 +2,7 @@
 
 import { Card, CardBody } from "@nextui-org/react";
 import MarqueeOffersTable from "./tables/marquee-offers-table";
-import { MarqueeOffers } from "@prisma/client";
+import type { MarqueeOffers } from "@prisma/client";
 import CreateOffers from "../dialog/marquee-offers/create-offers";
 import { useState } from "react";
 

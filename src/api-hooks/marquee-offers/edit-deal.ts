@@ -9,7 +9,7 @@ async function handleUpdate({
   id,
   values,
 }: {
-  id: number;
+  id: string;
   values: z.infer<typeof ZodMarqueeOfferSchema>;
 }) {
   const { data } = await axios.put("/api/offers/marquee", {

@@ -17,7 +17,7 @@ const DeleteDeal = ({
   id,
   setDealData,
 }: {
-  id: number;
+  id: string;
   setDealData: Dispatch<SetStateAction<BestDeal | null>>;
 }) => {
   const { isOpen, onOpenChange, onOpen, onClose } = useDisclosure();

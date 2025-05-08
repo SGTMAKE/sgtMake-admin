@@ -2,7 +2,7 @@ import axios from "@/config/axios.config";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-export async function handleDelete(id: number) {
+export async function handleDelete(id: string) {
   const { data: result } = await axios.delete(`/api/offers/marquee?id=${id}`);
   return result;
 }

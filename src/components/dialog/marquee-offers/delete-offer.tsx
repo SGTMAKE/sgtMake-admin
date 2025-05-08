@@ -18,7 +18,7 @@ const DeleteMarqueeOffer = ({
   id,
   setOffersData,
 }: {
-  id: number;
+  id: string;
   setOffersData: Dispatch<SetStateAction<MarqueeOffers[] | null>>;
 }) => {
   const { isOpen, onOpenChange, onOpen, onClose } = useDisclosure();
