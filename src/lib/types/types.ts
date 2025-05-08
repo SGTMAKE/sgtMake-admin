@@ -223,7 +223,7 @@ type ColorVariant = {
 type ColorVariantReturn = {
   color: string | null;
   thumbnail: {
-    id: number | undefined;
+    id: string | undefined;
     url: string | undefined;
   };
   others: {
@@ -258,7 +258,7 @@ type ImagePreviewProps = {
 type ColorVariantRes = {
   color: string | null;
   images: {
-    id: number;
+    id: string;
     url: string;
   }[];
 };
