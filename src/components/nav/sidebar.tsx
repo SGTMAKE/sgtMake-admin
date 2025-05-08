@@ -86,10 +86,10 @@ const Sidebar = () => {
         animate={open ? "open" : "closed"}
         className="text-gray fixed z-[49] h-screen w-[16rem] max-w-[16rem] overflow-hidden bg-white dark:bg-dark lg:relative"
       >
-        <div className="mx-3.5 flex items-center gap-4 py-3 font-medium italic">
+        <div className="mx-3.5 flex items-center gap-4 py-3 font-medium ">
           <Image
-            src="/icon.png"
-            className="flex-shrink-0"
+            src="/apple-touch-icon.png"
+            className="flex-shrink-0 bg-white rounded-lg"
             alt="icon"
             width={40}
             height={45}
@@ -157,7 +157,7 @@ const Sidebar = () => {
                   ],
                 }}
               />
-              <li>
+              {/* <li>
                 <Link
                   href="/dashboard/offers"
                   className={`${
@@ -169,7 +169,7 @@ const Sidebar = () => {
                     Best Deals & Offers
                   </p>
                 </Link>
-              </li>
+              </li> */}
               {/* <li>
                 <Link
                   href="/dashboard/site-traffic"

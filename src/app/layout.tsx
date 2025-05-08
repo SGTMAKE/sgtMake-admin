@@ -9,7 +9,7 @@ import { GlobalContextProvider } from "@/context/store";
 import Loading from "./loading";
 
 export const metadata: Metadata = {
-  title: "Admin GadgeXhub",
+  title: "Admin SGTMAKE",
   description: "Discover the Latest Gadgets: Your One-Stop Gadget Shop!",
 };
 
