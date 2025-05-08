@@ -188,7 +188,7 @@ type EditProductProps = {
   slug: string;
   shortDescription?: string | null;
   description: string;
-  categoryId: number;
+  categoryId: string;
   stock: number;
   basePrice: number;
   offerPrice: number;
