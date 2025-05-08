@@ -89,7 +89,7 @@ export async function PUT(req: NextRequest) {
     }
 
     const data: {
-      id: number;
+      id: string;
       values: z.infer<typeof ZodHeroBannerSchema>;
       images: { image: string; imageSm: string };
     } = await req.json();
@@ -146,7 +146,7 @@ export async function DELETE(req: NextRequest) {
       cloudinary.uploader.destroy(`hero-banner/${publicId}Sm`),
       db.heroBanner.delete({
         where: {
-          id: Number(id),
+          id: id,
         },
       }),
     ];

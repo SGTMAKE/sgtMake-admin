@@ -18,7 +18,7 @@ const OrderDetails = async ({ params }: { params: { oid: string } }) => {
       <div className="@container">
         <div className="grid grid-cols-1 gap-2 @xl:grid-cols-3">
           <div className="col-span-2">
-            <InvoiceCard oid={params.oid} />
+            <InvoiceCard oid={params.oid} orderID = {order.orderID} />
             <ProductDetails data={order} />
             <OrderStatus
               oid={order.id}

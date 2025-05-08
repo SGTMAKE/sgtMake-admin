@@ -61,7 +61,7 @@ export async function DELETE(req: NextRequest) {
 
     await db.address.delete({
       where: {
-        address_id: Number(addressId),
+        address_id: addressId,
       },
     });
     return success200({});

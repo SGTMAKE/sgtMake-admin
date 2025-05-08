@@ -65,7 +65,7 @@ export async function PUT(req: NextRequest) {
     }
 
     const data: {
-      id: number;
+      id: string;
       values: z.infer<typeof ZodMarqueeOfferSchema>;
     } = await req.json();
 
@@ -112,7 +112,7 @@ export async function DELETE(req: NextRequest) {
 
     await db.marqueeOffers.delete({
       where: {
-        id: Number(id),
+        id: id,
       },
     });
 

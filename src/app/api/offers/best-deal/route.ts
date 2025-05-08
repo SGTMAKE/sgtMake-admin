@@ -72,7 +72,7 @@ export async function PUT(req: NextRequest) {
     }
 
     const data: {
-      id: number;
+      id: string;
       values: z.infer<typeof ZodBestDealSchema>;
       imageUrl: string;
     } = await req.json();
@@ -137,7 +137,7 @@ export async function DELETE(req: NextRequest) {
 
     await db.bestDeal.delete({
       where: {
-        id: Number(id),
+        id: id,
       },
     });
 

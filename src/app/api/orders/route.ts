@@ -31,6 +31,7 @@ export async function GET() {
 
     const formattedOrders = orders.map((order) => ({
       id: order.id,
+      orderID:order.orderID,
       payment_verified: order.payment_verified,
       status: order.status === "placed" ? "pending" : order.status,
       total: order.total,

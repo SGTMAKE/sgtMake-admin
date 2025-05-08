@@ -35,7 +35,7 @@ const statusColorMap: Record<string, ChipProps["color"]> = {
 };
 
 const columns = [
-  { name: "ORDER ID", uid: "id" },
+  { name: "ORDER ID", uid: "orderID" },
   { name: "USER ID", uid: "userId" },
   { name: "AMOUNT", uid: "total", sortable: true },
   { name: "ORDERED DATE", uid: "orderDate", sortable: true },
@@ -48,7 +48,7 @@ const columns = [
 ];
 
 const INITIAL_VISIBLE_COLUMNS = [
-  "id",
+  "orderID",
   "total",
   "orderDate",
   "payment_verified",

@@ -44,6 +44,7 @@ export async function GET(req: NextRequest, { params }: { params: { oid: string 
     return success200({
       order: {
         id: order.id,
+        orderID:order.orderID,
         orderDate: order.orderDate,
         packedDate: order.packedDate,
         deliveredDate: order.deliveredDate,
