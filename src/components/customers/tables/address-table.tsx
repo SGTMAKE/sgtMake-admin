@@ -101,11 +101,20 @@ export default function AddressTable() {
 
   const sortedItems = React.useMemo(() => {
     return [...items].sort((a: Address, b: Address) => {
-      const first = a[sortDescriptor.column as keyof Address] as number;
-      const second = b[sortDescriptor.column as keyof Address] as number;
-      const cmp = first < second ? -1 : first > second ? 1 : 0;
-
-      return sortDescriptor.direction === "descending" ? -cmp : cmp;
+      const column = sortDescriptor.column as keyof Address;
+  
+      const first = a[column];
+      const second = b[column];
+  
+      if (first == null || second == null) return 0;
+  
+      // Convert booleans to strings for consistent comparison
+      const firstValue = typeof first === "boolean" ? first.toString() : first;
+      const secondValue = typeof second === "boolean" ? second.toString() : second;
+  
+      if (firstValue < secondValue) return sortDescriptor.direction === "descending" ? 1 : -1;
+      if (firstValue > secondValue) return sortDescriptor.direction === "descending" ? -1 : 1;
+      return 0;
     });
   }, [sortDescriptor, items]);
 
