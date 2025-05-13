@@ -52,7 +52,7 @@ const Tabs = ({ children }: { children: React.ReactNode[] }) => {
         <h1 className="my-5 text-xl text-zinc-400">All Guest Users</h1>
         {children[1]}
       </Tab>
-      <Tab
+      {/* <Tab
         key="analytics"
         href="/dashboard/customers?tab=analytics"
         as={Link}
@@ -64,7 +64,7 @@ const Tabs = ({ children }: { children: React.ReactNode[] }) => {
         }
       >
         <Analytics />
-      </Tab>
+      </Tab> */}
     </NextUITabs>
   );
 };

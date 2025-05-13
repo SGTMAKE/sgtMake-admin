@@ -73,7 +73,7 @@ const Tabs = ({
         </div>
         {children}
       </Tab>
-      <Tab
+      {/* <Tab
         key="analytics"
         href={`/dashboard/products/${pid}?tab=analytics`}
         as={Link}
@@ -85,7 +85,7 @@ const Tabs = ({
         }
       >
         <Analytics product={product} />
-      </Tab>
+      </Tab> */}
     </NextUITabs>
   );
 };

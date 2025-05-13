@@ -125,7 +125,7 @@ export default async function ServiceDetailPage({
             <div>
               <h2 className="text-lg font-semibold mb-4">File Information</h2>
               <div className="space-y-3">
-                <DetailItem label="File Name" value={service.fileName || "N/A"} />
+                {/* <DetailItem label="File Name" value={service.fileName || "N/A"} /> */}
                 <DetailItem label="File Type" value={service.fileType || "N/A"} />
                 {service.fileUrl ? (
                   <div>

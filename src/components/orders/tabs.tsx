@@ -37,7 +37,7 @@ const Tabs = ({ children }: { children: React.ReactNode }) => {
       >
         {children}
       </Tab>
-      <Tab
+      {/* <Tab
         key="analytics"
         href={`/dashboard/orders?tab=analytics`}
         as={Link}
@@ -49,7 +49,7 @@ const Tabs = ({ children }: { children: React.ReactNode }) => {
         }
       >
         <Analytics />
-      </Tab>
+      </Tab> */}
     </NextUITabs>
   );
 };
