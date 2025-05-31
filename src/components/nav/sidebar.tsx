@@ -88,8 +88,16 @@ const Sidebar = () => {
       >
         <div className="mx-3.5 flex items-center gap-4 py-3 font-medium ">
           <Image
-            src="/apple-touch-icon.png"
-            className="flex-shrink-0 bg-white rounded-lg"
+            src="/logo-white.png"
+            className="flex-shrink-0 bg-white hidden dark:block"
+            alt="icon"
+            width={40}
+            height={45}
+            style={{ width: "auto", height: "auto" }}
+          />
+          <Image
+            src="/logo.png"
+            className="flex-shrink-0 bg-white block dark:hidden"
             alt="icon"
             width={40}
             height={45}

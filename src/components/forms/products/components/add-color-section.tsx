@@ -39,10 +39,10 @@ const AddColorSection = ({
     <div className="mt-3">
       <div className="flex items-center justify-between gap-3">
         <h1 className="text-sm">
-          Color {index + 1}:{" "}
+          Model No. {index + 1}:{" "}
           {index === 0 && (
             <span className="text-xs text-gray-400">
-              &#40;Type &apos;default&apos; if there is only a single color
+              &#40;Type &apos;default&apos; if there is only a single model
               variant!&#41;
             </span>
           )}

@@ -73,7 +73,7 @@ const EditProductForm = ({ product }: { product: EditProductProps }) => {
             color="primary"
             onClick={setColors}
           >
-            Edit Product
+            Save Product
           </Button>
         </div>
       </form>

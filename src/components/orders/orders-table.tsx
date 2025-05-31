@@ -87,7 +87,7 @@ export default function OrdersTable({ orders }: { orders?: OrderProps[] }) {
 
     if (hasSearchFilter) {
       filteredOrders = filteredOrders?.filter((order) =>
-        order.id.toLowerCase().includes(filterValue.toLowerCase()),
+        order.orderID.toLowerCase().includes(filterValue.toLowerCase()),
       );
     }
 

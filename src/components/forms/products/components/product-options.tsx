@@ -24,7 +24,7 @@ const ProductOptions = ({ form }: ProductFormProps) => {
   return (
     <div className="flex-1 p-5 ps-3">
       <div className="mb-3 flex w-full items-center justify-between">
-        <p className="font-medium">Color</p>
+        <p className="font-medium">Model Number</p>
         <Button
           isIconOnly
           type="button"

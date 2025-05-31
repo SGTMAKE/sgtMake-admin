@@ -14,9 +14,10 @@ export default async function ServiceDetailPage({
   const { service } = await getServiceServer(params.id)
   const getFileDownloadUrl = () => {
     if (!service.filePublicId) return null
-
+    const isRaw = /\.(pdf|docx?|xlsx?|zip|csv|txt)$/i.test(service.filePublicId);
     return cloudinary.url(service.filePublicId, {
       flags: "attachment",
+      resource_type: isRaw ? "raw" : "image",
     })
   }
 
