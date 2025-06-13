@@ -248,6 +248,7 @@ model Service {
   formDetails Json     // Key-value pairs for different service forms
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  status        String   @default("pending")
   
 
   @@map("services")

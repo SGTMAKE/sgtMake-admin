@@ -19,11 +19,13 @@ import {
   type SortDescriptor,
   Chip,
   type ChipProps,
+
 } from "@nextui-org/react"
 import { ChevronDown, Eye, Search } from "lucide-react"
 import { capitalize, formateDate } from "@/lib/utils"
 import Link from "next/link"
-import type { ServiceProps } from "@/lib/types/service-types"
+import type { ServiceProps, ServiceStatus } from "@/lib/types/service-types"
+import { useUpdateServiceStatus } from "@/api-hooks/services/update-status"
 
 const statusColorMap: Record<string, ChipProps["color"]> = {
   completed: "success",
@@ -37,11 +39,12 @@ const columns = [
   { name: "SERVICE TYPE", uid: "serviceType", sortable: true },
   { name: "CREATED DATE", uid: "createdAt", sortable: true },
   { name: "UPDATED DATE", uid: "updatedAt", sortable: true },
+  { name: "STATUS", uid: "status", sortable: true },
   { name: "FILE", uid: "file" },
   { name: "ACTIONS", uid: "actions" },
 ]
 
-const INITIAL_VISIBLE_COLUMNS = ["id", "userId", "serviceType", "createdAt", "file", "actions"]
+const INITIAL_VISIBLE_COLUMNS = ["id", "userId", "serviceType", "status", "createdAt", "file", "actions"]
 
 export default function ServicesTable({ services }: { services?: ServiceProps[] }) {
   const [filterValue, setFilterValue] = React.useState("")
@@ -52,6 +55,18 @@ export default function ServicesTable({ services }: { services?: ServiceProps[] 
     direction: "descending",
   })
   const [page, setPage] = React.useState(1)
+
+  const updateStatusMutation = useUpdateServiceStatus()
+
+  const statusOptions: { value: ServiceStatus; label: string }[] = [
+    { value: "pending", label: "Requested",   },
+  { value: "approved", label: "Review & Approved"  },
+  { value: "production", label: "In Production" },
+  { value: "testing", label: "Quality Test"  },
+  { value: "shipped", label: "Shipped"  },
+  { value: "delivered", label: "Delivered"},
+  { value: "cancelled", label: "Cancelled" },
+  ]
 
   const hasSearchFilter = Boolean(filterValue)
 
@@ -125,6 +140,60 @@ export default function ServicesTable({ services }: { services?: ServiceProps[] 
         return formateDate(service.createdAt)
       case "updatedAt":
         return formateDate(service.updatedAt)
+      case "status":
+        return (
+          // <Select
+          //   size="sm"
+          //   variant="flat"
+          //   selectedKeys={[service.status]}
+          //   onSelectionChange={(keys) => {
+          //     const newStatus = Array.from(keys)[0] as ServiceStatus
+          //     if (newStatus !== service.status) {
+          //       updateStatusMutation.mutate({
+          //         serviceId: service.id,
+          //         status: newStatus,
+          //       })
+          //     }
+          //   }}
+          //   className="min-w-[120px]"
+          // >
+          //   {statusOptions.map((option) => (
+          //     <SelectItem key={option.value} value={option.value}>
+          //       <Chip
+          //         size="sm"
+          //         variant="flat"
+          //         color={
+          //           option.value === "completed"
+          //             ? "success"
+          //             : option.value === "processing"
+          //               ? "warning"
+          //               : option.value === "cancelled" || option.value === "cancel_requested"
+          //                 ? "danger"
+          //                 : "default"
+          //         }
+          //       >
+          //         {option.label}
+          //       </Chip>
+          //     </SelectItem>
+          //   ))}
+          // </Select>
+          
+                          <Chip
+                          className=" capitalize"
+                                  size="sm"
+                                  variant="flat"
+                                  color={service.status === "delivered"
+                                    ? "success"
+                                    : service.status === "pending"
+                                      ? "warning"
+                                      : service.status === "cancelled" || service.status === "cancel_requested"
+                                        ? "danger"
+                                        : "primary"
+                                  }
+                                >
+                                  {service.status}
+                                </Chip>
+        )
       case "file":
         return service.fileUrl ? (
           <a
@@ -154,7 +223,7 @@ export default function ServicesTable({ services }: { services?: ServiceProps[] 
           </div>
         )
       default:
-        return String(service[columnKey as keyof ServiceProps] || '')
+        return String(service[columnKey as keyof ServiceProps] || "")
     }
   }, [])
 

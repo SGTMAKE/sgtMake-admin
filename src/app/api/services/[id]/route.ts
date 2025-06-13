@@ -52,7 +52,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
       service,
     })
   } catch (error) {
-    console.error("Error fetching service:", error)
+    console.log("Error fetching service:", error)
     return NextResponse.json({ success: false, message: "Failed to fetch service" }, { status: 500 })
   }
 }

@@ -36,7 +36,9 @@ const OrderDetails = async ({ params }: { params: { oid: string } }) => {
           <div>
             <CustomerDetails data={order.User} />
             <AddressDetails data={order.Address} />
-            <PaymentDetails data={order.Payment} />
+
+            
+            {order.payment_verified && <PaymentDetails data={order.Payment} />}
           </div>
         </div>
       </div>

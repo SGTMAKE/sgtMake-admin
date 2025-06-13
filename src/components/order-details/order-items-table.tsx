@@ -40,7 +40,7 @@ export default function OrderItemsTable({ data }: { data: OrderItemProps[] }) {
           <div className="mt-1">
             {Object.entries(order.customProduct.options).map(([key, value]) => {
               // Skip non-display fields
-              if (["quantity","totalPrice", "fastenerType", "image"].includes(key)) {
+              if (["quantity","totalPrice", "fastenerType", "image","title"].includes(key)) {
                 return null
               }
               
