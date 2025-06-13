@@ -13,7 +13,7 @@ import {
 } from "@/lib/zod-schemas/schema";
 import { getServerSession } from "next-auth";
 import { NextRequest } from "next/server";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 
 export async function GET() {
   try {
