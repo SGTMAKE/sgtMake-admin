@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: "404",
   description: "Something went wrong",
 };
-
+export const dynamic = "force-dynamic"
 export default function NotFound() {
   return (
     <div className="flex min-h-[100vh] flex-col items-center justify-center">

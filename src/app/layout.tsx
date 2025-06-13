@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   title: "Admin SGTMAKE",
   description: "Discover the Latest Gadgets: Your One-Stop Gadget Shop!",
 };
-
+export const dynamic = "force-dynamic"
 export default async function RootLayout({
   children,
 }: {
