@@ -40,6 +40,8 @@ const ProductPage = async ({
               colors: product.color,
               images: product.Image,
             }),
+            isDeleted:product.isDeleted,
+            deletedAt:product.deletedAt
           }}
           searchParams={searchParams}
         />

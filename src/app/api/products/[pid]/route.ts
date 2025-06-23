@@ -47,6 +47,10 @@ export async function GET(
       return error400("Invalid product ID", {});
     }
 
+    if (product.isDeleted) {
+      return error400("Product has been deleted and is no longer accessible", {})
+    }
+    
     return success200({ product });
   } catch (error) {
     return error500({});
@@ -99,6 +103,7 @@ export async function PUT(
           type: "upload",
           prefix: `products/${dbProduct.slug}/`,
         });
+        console.log(resources)
 
         // Step 2: Move images to the new slug folder
         const moveTasks = resources.resources.map((resource: any) => {
@@ -168,7 +173,6 @@ export async function PUT(
     return error500({});
   }
 }
-
 export async function DELETE(
   req: NextRequest,
   { params }: { params: { pid: string } },
@@ -190,36 +194,57 @@ export async function DELETE(
     }
 
     const dbProduct = await db.product.findUnique({
-      where: {
-        id: pid,
-      },
+      where: { id: pid },
       select: {
         slug: true,
+        isDeleted: true,
       },
     });
 
-    if (!dbProduct) return error400("Product with this ID not found", {});
+    if (!dbProduct) {
+      return error400("Product with this ID not found", {});
+    }
 
-    // List all resources (images) in the specified folder
-    const result = await cloudinary.api.resources({
-      type: "upload",
-      prefix: `products/${dbProduct.slug}/`,
-    });
+    try {
+      // First try hard delete (remove images, then delete record)
+      const result = await cloudinary.api.resources({
+        type: "upload",
+        prefix: `products/${dbProduct.slug}/`,
+      });
 
-    // Create an array of promises to delete each image
-    const deletePromises: Promise<any>[] = result.resources.map(
-      (resource: any) => deleteImage(resource.public_id),
-    );
-    deletePromises.push(
-      db.product.delete({ where: { id: pid } }),
-      cloudinary.api.delete_folder(`products/${dbProduct.slug}`),
-    );
+      const deletePromises: Promise<any>[] = result.resources.map(
+        (resource: any) => deleteImage(resource.public_id),
+      );
 
-    // Use Promise.all to execute all delete promises in parallel
-    await Promise.all(deletePromises);
+      deletePromises.push(
+        db.product.delete({ where: { id: pid } }),
+        // cloudinary.api.delete_folder(`products/${dbProduct.slug}`),
+      );
 
-    return success200({});
+      await Promise.all(deletePromises);
+
+      return success200({ message: "Product permanently deleted." });
+    } catch (hardDeleteError: any) {
+      // If hard delete fails due to relational constraint violation, fallback to soft delete
+      if (hardDeleteError.code === "P2014" || hardDeleteError.code === "P2003") {
+        const softDeleted = await db.product.update({
+          where: { id: pid },
+          data: {
+            isDeleted: true,
+            deletedAt: new Date(),
+          },
+        });
+
+        return success200({ message: "Product is soft-deleted due to constraints.", data: softDeleted });
+      }
+
+      // Unknown error during hard delete
+      throw hardDeleteError;
+    }
   } catch (error) {
+    console.error("DELETE product error:", error);
     return error500({});
   }
 }
+
+

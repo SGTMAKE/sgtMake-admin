@@ -6,14 +6,14 @@ const InvoiceCard = ({ oid ,orderID }: { oid: string ,orderID:string }) => {
     <Card className="rounded-sm shadow-sm">
       <CardBody className="flex-row items-center justify-between">
         <h1 className="font-semibold">Order #{orderID}</h1>
-        <Button
+        {/* <Button
           startContent={<Download size={15} />}
           size="sm"
           color="success"
           className="text-white"
         >
           Invoice
-        </Button>
+        </Button> */}
       </CardBody>
     </Card>
   );

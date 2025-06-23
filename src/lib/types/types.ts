@@ -164,6 +164,7 @@ type ProductProps = Omit<Product, "createAt"> & {
   image: string;
   category: string;
   createdAt: string;
+  
 };
 
 type ProductResProps = Res & {

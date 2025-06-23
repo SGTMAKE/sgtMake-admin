@@ -21,6 +21,9 @@ export async function GET() {
     }
 
     const categories = await db.category.findMany({
+      where:{
+          isDeleted: false
+      },
       include: {
         _count: {
           select: {
@@ -82,7 +85,7 @@ export async function DELETE(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session || !session.user || !session.user.id) {
+    if (!session || !session.user?.id) {
       return error401("Unauthorized");
     }
 
@@ -95,18 +98,34 @@ export async function DELETE(req: NextRequest) {
       return error400("Invalid data format.", {});
     }
 
-    await db.category.delete({
-      where: {
-        id: cid,
-      },
-    });
+    try {
+      // Attempt hard delete
+      await db.category.delete({
+        where: { id: cid },
+      });
 
-    return success200({});
+      return success200({ message: "Category hard deleted." });
+
+    } catch (error: any) {
+      // If there's a foreign key constraint or not found
+      if (error.code === "P2014" || error.code === "P2025") {
+        const softDelete = await db.category.update({
+          where: { id: cid },
+          data: { isDeleted: true },
+        });
+
+        return success200({ message: "Soft deleted due to constraints", data: softDelete });
+      }
+
+      // Unknown error
+      throw error;
+    }
   } catch (error) {
-    console.log(error);
+    console.log("DELETE /api/category failed:", error);
     return error500({});
   }
 }
+
 
 export async function PUT(req: NextRequest) {
   try {

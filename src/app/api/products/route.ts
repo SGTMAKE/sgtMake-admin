@@ -32,6 +32,9 @@ export async function GET() {
     }
 
     const products = await db.product.findMany({
+      where: {
+        isDeleted: false, // Only get non-deleted products
+      },
       include: {
         Image: true,
         Category: {
@@ -98,6 +101,7 @@ export async function POST(req: NextRequest) {
       ]);
 
       const response = await Promise.all(promises);
+      console.log(response)
 
       const product = await db.product.create({
         data: {

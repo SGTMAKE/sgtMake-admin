@@ -99,6 +99,8 @@ model Category {
   Category Category[]  @relation("Category")
   Product  Product[]
   description String?
+  isDeleted   Boolean?  @default(false)
+  deletedAt   DateTime?
 }
 
 model GuestUser {
@@ -122,7 +124,8 @@ model Image {
   id            String  @id @default(auto()) @map("_id") @db.ObjectId
   imagePublicId String
   productId     String  @db.ObjectId
-  Product       Product @relation(fields: [productId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Product       Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
 
   @@unique([productId, id])
 }
@@ -153,8 +156,8 @@ model OrderItem {
   basePrice     Float
   offerPrice    Float
   customProduct CustomProductJson?    // JSON field to store custom product data
-  Order         Order    @relation(fields: [orderId], references: [id])
-  Product       Product? @relation(fields: [productId], references: [id], onDelete: NoAction, onUpdate: NoAction) // Made optional
+  Order         Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  Product       Product? @relation(fields: [productId], references: [id]) // Made optional
 
   @@index([orderId])
   @@index([productId])
@@ -192,7 +195,8 @@ model Product {
   Image            Image[]
   OrderItem       OrderItem[]
   Category         Category    @relation(fields: [categoryId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-
+isDeleted   Boolean?  @default(false)
+  deletedAt   DateTime?
   @@index([slug])
 }
 

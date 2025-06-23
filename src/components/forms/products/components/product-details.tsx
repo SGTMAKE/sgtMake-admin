@@ -132,7 +132,7 @@ const ProductDetails = ({ form }: ProductFormProps) => {
               <FormControl>
                 <Select
                   placeholder="Select a category"
-                  label="Category Id"
+                  label="Category"
                   labelPlacement="outside"
                   onChange={field.onChange}
                   selectedKeys={categories ? [field.value || ""] : ""}

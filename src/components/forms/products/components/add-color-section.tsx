@@ -53,7 +53,7 @@ const AddColorSection = ({
       </div>
       <div className="flex items-center gap-5">
         <Input
-          placeholder="Enter color"
+          placeholder="Enter Model Number"
           variant="faded"
           radius="sm"
           size="sm"
