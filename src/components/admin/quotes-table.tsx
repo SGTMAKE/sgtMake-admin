@@ -318,8 +318,20 @@ export default function QuotesTable({ quotes = [] }: QuotesTableProps) {
               )}
             </div>
           )
-        default:
-          return quote[columnKey as keyof QuoteRequest]
+        default: {
+          const value = quote[columnKey as keyof QuoteRequest]
+          if (
+            typeof value === "string" ||
+            typeof value === "number" ||
+            typeof value === "boolean" ||
+            React.isValidElement(value)
+          ) {
+            return value
+          }
+          // For objects/arrays/undefined, render as a string or fallback
+          if (value === undefined || value === null) return ""
+          return JSON.stringify(value)
+        }
       }
     },
     [updateStatusMutation.isPending],
