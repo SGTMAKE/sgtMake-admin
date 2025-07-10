@@ -14,6 +14,8 @@ import {
   BadgePercent,
   Wallet,
   BarChart3,
+  Quote,
+  FileBox,
 } from "lucide-react";
 import { useMediaQuery } from "react-responsive";
 import Link from "next/link";
@@ -197,8 +199,19 @@ const Sidebar = () => {
                     pathname === "/dashboard/services" && "text-primary"
                   } flex cursor-default items-center justify-start rounded-md bg-transparent p-3 font-medium outline-none duration-300 md:cursor-pointer`}
                 >
-                  <Boxes size={23} className="min-w-max" />
+                  <FileBox size={23} className="min-w-max" />
                   <p className="ml-5 flex-1 text-left capitalize">Services</p>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/dashboard/quotes"
+                  className={`${
+                    pathname === "/dashboard/quotes" && "text-primary"
+                  } flex cursor-default items-center justify-start rounded-md bg-transparent p-3 font-medium outline-none duration-300 md:cursor-pointer`}
+                >
+                  <Quote size={23} className="min-w-max" />
+                  <p className="ml-5 flex-1 text-left capitalize">Quotes</p>
                 </Link>
               </li>
             </div>

@@ -26,7 +26,9 @@ import { useProducts } from "@/api-hooks/products/get-products";
 import { ProductProps } from "@/lib/types/types";
 import Link from "next/link";
 import DeleteProduct from "../dialog/products/delete-product";
-
+import Analytics from "./analytics";
+import ProductType from "@/components/admin/product-type"
+import { usePathname } from "next/navigation";
 const columns = [
   { name: "ID", uid: "id" },
   { name: "SLUG", uid: "slug" },
@@ -68,6 +70,7 @@ export default function ProductsTable() {
     direction: "ascending",
   });
   const [page, setPage] = React.useState(1);
+  const pathname = usePathname()
 
   const { data } = useProducts();
 
@@ -337,6 +340,9 @@ export default function ProductsTable() {
   }, [items.length, page, pages, hasSearchFilter]);
 
   return (
+    <>
+    <ProductType path={pathname} />
+    <Analytics />
     <Table
       aria-label="Products table"
       isHeaderSticky
@@ -368,5 +374,6 @@ export default function ProductsTable() {
         )}
       </TableBody>
     </Table>
+    </>
   );
 }

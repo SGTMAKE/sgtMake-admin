@@ -6,17 +6,22 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Analytics from "./analytics";
-
+import ProductType from "@/components/admin/product-type"
+import { usePathname } from "next/navigation";
 const Tabs = ({ children }: { children: React.ReactNode }) => {
   const searchParams = useSearchParams();
   const tab = searchParams.get("tab");
   const [selected, setSelected] = useState(tab || "products");
+  const pathname = usePathname()
 
   useEffect(() => {
     setSelected(tab || "products");
   }, [tab]);
 
   return (
+    <>
+    <ProductType path={pathname} />
+      
     <NextUITabs
       variant="underlined"
       aria-label="Products"
@@ -37,7 +42,7 @@ const Tabs = ({ children }: { children: React.ReactNode }) => {
       >
         <h1 className="my-5 text-xl text-zinc-400">All Products</h1>
         {children}
-      </Tab>
+      </Tab>3
       <Tab
         key="stats"
         href="/dashboard/products?tab=stats"
@@ -52,6 +57,7 @@ const Tabs = ({ children }: { children: React.ReactNode }) => {
         <Analytics />
       </Tab>
     </NextUITabs>
+    </>
   );
 };
 

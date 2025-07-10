@@ -226,6 +226,7 @@ model User {
   Order         Order[]
   Sessions       Session[]
   services      Service[]
+  quoteRequests QuoteRequest[]
 }
 
 model VerificationToken {
@@ -237,6 +238,7 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+
 model MarqueeOffers {
   id    String  @id @default(auto()) @map("_id") @db.ObjectId
   title String
@@ -246,6 +248,7 @@ model Service {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   userId      String   @db.ObjectId
   user         User     @relation(fields: [userId], references: [id])
+  type String 
   fileUrl     String
   fileType   String
   filePublicId String  // Cloudinary public_id
@@ -256,4 +259,101 @@ model Service {
   
 
   @@map("services")
+}
+
+// New models for dynamic fasteners and connectors/wires
+model FastenerCategory {
+  id          String            @id @default(auto()) @map("_id") @db.ObjectId
+  name        String            @unique
+  description String?
+  image       String?
+  isActive    Boolean           @default(true)
+  options     FastenerOption[]
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+}
+
+model FastenerOption {
+  id          String          @id @default(auto()) @map("_id") @db.ObjectId
+  categoryId  String
+  category    FastenerCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  name        String
+  label       String
+  type        String          // "select", "multiselect", "text", "number"
+  required    Boolean         @default(false)
+  helpText    String?
+  values      Json            // Array of possible values for select/multiselect
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+}
+
+model ConnectorCategory {
+  id          String             @id @default(auto()) @map("_id") @db.ObjectId
+  name        String             @unique
+  description String?
+  image       String?
+  isActive    Boolean            @default(true)
+  options     ConnectorOption[]
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+}
+
+model ConnectorOption {
+  id          String            @id @default(auto()) @map("_id") @db.ObjectId
+  categoryId  String
+  category    ConnectorCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  name        String
+  label       String
+  type        String            // "select", "multiselect", "text", "number"
+  required    Boolean           @default(false)
+  helpText    String?
+  values      Json              // Array of possible values for select/multiselect
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+}
+
+model WireCategory {
+  id          String        @id @default(auto()) @map("_id") @db.ObjectId
+  name        String        @unique
+  description String?
+  image       String?
+  isActive    Boolean       @default(true)
+  options     WireOption[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model WireOption {
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  categoryId  String
+  category    WireCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  name        String
+  label       String
+  type        String       // "select", "multiselect", "text", "number"
+  required    Boolean      @default(false)
+  helpText    String?
+  values      Json         // Array of possible values for select/multiselect
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model QuoteRequest {
+  id               String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId           String    @db.ObjectId
+  user             User      @relation(fields: [userId], references: [id])
+  items            Json
+  notes            String?
+  totalItems       Int
+  status           String
+  quotedPrice      Float?    // Quoted price from admin (use Float for MongoDB)
+  adminResponse    String?   // Admin's response
+  emailSent        Boolean   @default(false)
+  emailOpened      Boolean   @default(false)
+  responseReceived Boolean   @default(false)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([status], name: "QuoteRequest_status_idx")
+  @@index([userId, status], name: "QuoteRequest_userId_status_idx")
+  @@index([createdAt], name: "QuoteRequest_createdAt_idx")
 }

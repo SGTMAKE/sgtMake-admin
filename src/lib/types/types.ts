@@ -35,6 +35,49 @@ type Res = {
 type AdminProfileResProps = Res & {
   name: string;
 };
+export interface QuoteRequest {
+  id: string
+  userId: string
+  items: QuoteItem[]
+  notes: string
+  totalItems: number
+  status: "PENDING" | "QUOTED" | "ACCEPTED" | "REJECTED"
+  emailSent: boolean
+  emailOpened: boolean
+  responseReceived: boolean
+  adminResponse?: string
+  quotedPrice?: number
+  createdAt: string
+  updatedAt: string
+  user?: {
+    name: string
+    email: string
+    phone?: string
+  }
+}
+
+export interface QuoteItem {
+  id: string
+  type: "fastener" | "connector" | "wire"
+  categoryId: string
+  categoryName: string
+  title: string
+  quantity: number
+  specifications: Record<string, any>
+  image?: string
+}
+
+export interface QuoteRequestResponse {
+  success: boolean
+  quotes: QuoteRequest[]
+  message?: string
+}
+
+export interface QuoteSubmissionResponse {
+  success: boolean
+  quoteId: string
+  message: string
+}
 
 type AdminProps = {
   id: string;
