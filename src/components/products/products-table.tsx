@@ -191,7 +191,19 @@ export default function ProductsTable() {
             </div>
           );
         default:
-          return cellValue;
+          // Ensure Date is rendered as string, arrays as comma-separated, booleans as string
+          if (cellValue instanceof Date) {
+            return cellValue.toLocaleString();
+          }
+          if (Array.isArray(cellValue)) {
+            return cellValue.join(", ");
+          }
+          if (typeof cellValue === "boolean") {
+            return cellValue ? "Yes" : "No";
+          }
+          return cellValue !== null && cellValue !== undefined
+            ? cellValue.toString()
+            : "";
       }
     },
     [],
