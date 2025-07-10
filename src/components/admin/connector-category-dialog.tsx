@@ -193,7 +193,7 @@ export function ConnectorCategoryDialog({
           </div>
 
           <ImageUpload
-            ref={imageUploadRef}
+            // ref={imageUploadRef}
             value={formData.image}
             onChange={handleImageChange}
             label="Category Image"

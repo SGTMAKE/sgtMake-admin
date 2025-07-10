@@ -185,7 +185,7 @@ export function FastenerCategoryDialog({ open, onOpenChange, category, onSuccess
           </div>
 
           <ImageUpload
-            ref={imageUploadRef}
+            // ref={imageUploadRef}
             value={formData.image}
             onChange={handleImageChange}
             label="Category Image"
