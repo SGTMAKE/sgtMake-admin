@@ -1,4 +1,4 @@
-"use client"
+
 import Nav from "@/components/nav/nav"
 import ServiceDetailClient from "@/components/dashboard/services/service-detail"
 

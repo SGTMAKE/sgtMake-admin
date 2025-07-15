@@ -140,7 +140,7 @@ export function QuoteDetailsDialog({ open, onOpenChange, quote }: QuoteDetailsDi
                             <p className="text-xs font-medium text-gray-700 mb-2">Specifications:</p>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
                               {Object.entries(item.specifications)
-                                .filter(([key, value]) => key !== "quantity" && key !== "remarks" && value)
+                                .filter(([key, value]) => key !== "quantity"  && value)
                                 .map(([key, value]) => (
                                   <div key={key}>
                                     <span className="text-gray-500 capitalize">{key.replace(/_/g, " ")}:</span>

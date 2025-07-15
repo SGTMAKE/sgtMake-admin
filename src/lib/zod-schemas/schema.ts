@@ -109,7 +109,7 @@ export const ZodCategorySchema = z.object({
 
 export const ZodBestDealSchema = z.object({
   title: z.string(),
-  id: z.string().length(25, "Invalid product ID"),
+  id: z.string().length(24, "Invalid product ID"),
   slug: z.string(),
   description: z
     .string()

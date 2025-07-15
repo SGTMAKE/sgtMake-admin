@@ -104,7 +104,6 @@ export function QuoteResponseDialog({ open, onOpenChange, quote, onSuccess }: Qu
           <div className="space-y-2">
             <Label htmlFor="quotedPrice">Quoted Price (₹)</Label>
             <div className="relative">
-              <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
                 id="quotedPrice"
                 type="number"

@@ -1,8 +1,7 @@
 "use client"
 
 import type React from "react"
-
-import { useState, useRef } from "react"
+import { useState } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
@@ -13,7 +12,7 @@ import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Plus, Edit, Trash2, ImageIcon } from "lucide-react"
-import { ImageUpload } from "@/components/admin/image-upload"
+import SimpleImageUpload from "./simple-image-upload"
 import { toast } from "sonner"
 import Image from "next/image"
 
@@ -44,7 +43,6 @@ export function FastenerOptionsDialog({ open, onOpenChange, category, onSuccess 
   })
   const [newValue, setNewValue] = useState("")
   const [showImageUpload, setShowImageUpload] = useState<number | null>(null)
-  const imageUploadRefs = useRef<{ [key: number]: { uploadPendingFile: () => Promise<void> } }>({})
 
   const queryClient = useQueryClient()
 
@@ -117,7 +115,6 @@ export function FastenerOptionsDialog({ open, onOpenChange, category, onSuccess 
     })
     setNewValue("")
     setShowImageUpload(null)
-    imageUploadRefs.current = {}
   }
 
   const handleEditOption = (option: any) => {
@@ -169,25 +166,23 @@ export function FastenerOptionsDialog({ open, onOpenChange, category, onSuccess 
     })
   }
 
+  const handleValueImageRemove = (index: number) => {
+    const updatedValues = [...optionFormData.values]
+    updatedValues[index] = {
+      ...updatedValues[index],
+      image: "",
+      publicId: "",
+    }
+    setOptionFormData({
+      ...optionFormData,
+      values: updatedValues,
+    })
+  }
+
   const handleSubmitOption = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
-
-    try {
-      // Upload all pending images first
-      for (const [index, ref] of Object.entries(imageUploadRefs.current)) {
-        if (ref) {
-          await ref.uploadPendingFile()
-        }
-      }
-
-      // Then submit the form data
-      saveOptionMutation.mutate(optionFormData)
-    } catch (error) {
-      console.error("Image upload error:", error)
-      toast.error("Failed to upload images")
-      setIsSubmitting(false)
-    }
+    saveOptionMutation.mutate(optionFormData)
   }
 
   const isLoading = isSubmitting || saveOptionMutation.isPending
@@ -444,17 +439,14 @@ export function FastenerOptionsDialog({ open, onOpenChange, category, onSuccess 
                         )}
 
                         {showImageUpload === index && (
-                          <ImageUpload
-                            ref={(ref) => {
-                              if (ref) imageUploadRefs.current[index] = ref
-                            }}
-                            value={valueObj.image}
-                            onChange={(url, publicId) => handleValueImageChange(index, url, publicId)}
+                          <SimpleImageUpload
+                            currentImageUrl={valueObj.image}
+                            currentPublicId={valueObj.publicId}
+                            onImageChange={(url, publicId) => handleValueImageChange(index, url, publicId)}
+                            onImageRemove={() => handleValueImageRemove(index)}
                             label={`Image for ${valueObj.value}`}
-                            size="small"
-                            quality="low"
-                            deferred={true}
                             disabled={isLoading}
+                            className="mt-2"
                           />
                         )}
                       </div>
@@ -475,7 +467,7 @@ export function FastenerOptionsDialog({ open, onOpenChange, category, onSuccess 
                 Back to Options
               </Button>
               <Button type="submit" disabled={isLoading} className="bg-orange-500 hover:bg-orange-600 text-white">
-                {isLoading ? (isSubmitting ? "Uploading..." : "Saving...") : "Save Option"}
+                {isLoading ? "Saving..." : "Save Option"}
               </Button>
             </div>
           </form>

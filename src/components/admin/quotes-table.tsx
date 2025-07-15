@@ -510,7 +510,6 @@ export default function QuotesTable({ quotes = [] }: QuotesTableProps) {
                       placeholder="Enter quoted price"
                       value={quotedPrice}
                       onValueChange={setQuotedPrice}
-                      startContent={<DollarSign className="h-4 w-4 text-default-400" />}
                     />
 
                     <Textarea
@@ -605,7 +604,7 @@ export default function QuotesTable({ quotes = [] }: QuotesTableProps) {
                               <div className="mt-2 p-2 bg-default-50 rounded text-xs">
                                 <p className="font-medium mb-1">Specifications:</p>
                                 {Object.entries(item.specifications)
-                                  .filter(([key, value]) => key !== "quantity" && key !== "remarks" && value)
+                                  .filter(([key, value]) => key !== "quantity" && value)
                                   .map(([key, value]) => (
                                     <p key={key}>
                                       <span className="capitalize">{key.replace(/_/g, " ")}:</span>{" "}
@@ -633,14 +632,14 @@ export default function QuotesTable({ quotes = [] }: QuotesTableProps) {
                 <Button color="danger" variant="light" onPress={onClose}>
                   Close
                 </Button>
-                <Button
+                {/* <Button
                   as={Link}
                   href={`/admin/quotes/${selectedQuote?.id}`}
                   color="primary"
                   startContent={<Eye className="h-4 w-4" />}
                 >
                   View Full Details
-                </Button>
+                </Button> */}
               </ModalFooter>
             </>
           )}

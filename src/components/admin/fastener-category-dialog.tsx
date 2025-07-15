@@ -1,8 +1,7 @@
 "use client"
 
 import type React from "react"
-
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import { useMutation } from "@tanstack/react-query"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
@@ -10,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
-import { ImageUpload } from "@/components/admin/image-upload"
+import SimpleImageUpload from "./simple-image-upload"
 import { toast } from "sonner"
 
 interface FastenerCategoryDialogProps {
@@ -29,7 +28,6 @@ export function FastenerCategoryDialog({ open, onOpenChange, category, onSuccess
     isActive: true,
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const imageUploadRef = useRef<{ uploadPendingFile: () => Promise<void> }>()
 
   useEffect(() => {
     if (category) {
@@ -55,17 +53,6 @@ export function FastenerCategoryDialog({ open, onOpenChange, category, onSuccess
     mutationFn: async (data: any) => {
       const url = category ? `/api/admin/fasteners/categories/${category.id}` : "/api/admin/fasteners/categories"
       const method = category ? "PUT" : "POST"
-
-      // If editing and image changed, delete old image
-      if (category && category.publicId && data.publicId !== category.publicId) {
-        try {
-          await fetch(`/api/upload?publicId=${category.publicId}`, {
-            method: "DELETE",
-          })
-        } catch (error) {
-          console.error("Error deleting old image:", error)
-        }
-      }
 
       const response = await fetch(url, {
         method,
@@ -93,27 +80,22 @@ export function FastenerCategoryDialog({ open, onOpenChange, category, onSuccess
     setFormData((prev) => ({
       ...prev,
       image: url,
-      publicId: publicId || prev.publicId,
+      publicId: publicId || "",
+    }))
+  }
+
+  const handleImageRemove = () => {
+    setFormData((prev) => ({
+      ...prev,
+      image: "",
+      publicId: "",
     }))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
-
-    try {
-      // Upload pending image first if exists
-      if (imageUploadRef.current) {
-        await imageUploadRef.current.uploadPendingFile()
-      }
-
-      // Then submit the form data
-      mutation.mutate(formData)
-    } catch (error) {
-      console.error("Image upload error:", error)
-      toast.error("Failed to upload image")
-      setIsSubmitting(false)
-    }
+    mutation.mutate(formData)
   }
 
   const handleDelete = async () => {
@@ -184,14 +166,12 @@ export function FastenerCategoryDialog({ open, onOpenChange, category, onSuccess
             />
           </div>
 
-          <ImageUpload
-            // ref={imageUploadRef}
-            value={formData.image}
-            onChange={handleImageChange}
+          <SimpleImageUpload
+            currentImageUrl={formData.image}
+            currentPublicId={formData.publicId}
+            onImageChange={handleImageChange}
+            onImageRemove={handleImageRemove}
             label="Category Image"
-            size="medium"
-            quality="medium"
-            deferred={true}
             disabled={isLoading}
           />
 
@@ -215,12 +195,7 @@ export function FastenerCategoryDialog({ open, onOpenChange, category, onSuccess
 
           <div className="flex justify-between pt-4 border-t">
             {category && (
-              <Button
-                type="button"
-                onClick={handleDelete}
-                disabled={isLoading}
-                className="bg-red-500 hover:bg-red-600"
-              >
+              <Button type="button" onClick={handleDelete} disabled={isLoading} className="bg-red-500 hover:bg-red-600">
                 {isLoading ? "Deleting..." : "Delete Category"}
               </Button>
             )}
@@ -235,13 +210,7 @@ export function FastenerCategoryDialog({ open, onOpenChange, category, onSuccess
                 Cancel
               </Button>
               <Button type="submit" disabled={isLoading} className="bg-orange-500 hover:bg-orange-600 text-white">
-                {isLoading
-                  ? isSubmitting
-                    ? "Uploading..."
-                    : "Saving..."
-                  : category
-                    ? "Update Category"
-                    : "Create Category"}
+                {isLoading ? "Saving..." : category ? "Update Category" : "Create Category"}
               </Button>
             </div>
           </div>
