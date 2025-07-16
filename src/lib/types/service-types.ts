@@ -7,6 +7,7 @@ export interface ServiceProps {
   fileUrl: string
   fileType: string
   filePublicId: string
+  type:string
   status: ServiceStatus
   formDetails: {
     type: string
