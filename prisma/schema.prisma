@@ -248,19 +248,17 @@ model Service {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   userId      String   @db.ObjectId
   user         User     @relation(fields: [userId], references: [id])
-  type String 
   fileUrl     String
   fileType   String
   filePublicId String  // Cloudinary public_id
+  type String 
   formDetails Json     // Key-value pairs for different service forms
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   status        String   @default("pending")
-  
 
   @@map("services")
 }
-
 // New models for dynamic fasteners and connectors/wires
 model FastenerCategory {
   id          String            @id @default(auto()) @map("_id") @db.ObjectId
