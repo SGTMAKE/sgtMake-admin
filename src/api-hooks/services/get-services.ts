@@ -1,28 +1,17 @@
-import { useQuery } from "@tanstack/react-query"
-import { ServiceResProps } from "@/lib/types/service-types"
+"use client"
 
-export const useServices = () => {
-  return useQuery<ServiceResProps>({
+import axios from "@/config/axios.config"
+import type { ServiceResProps } from "@/lib/types/service-types"
+import { useQuery } from "@tanstack/react-query"
+
+async function fetchServices() {
+  const { data } = await axios.get("/api/services")
+  return data as ServiceResProps
+}
+
+export function useServices() {
+  return useQuery({
     queryKey: ["services"],
-    queryFn: async () => {
-      const response = await fetch("/api/services", {
-        cache: 'no-store',
-        headers: {
-          'Cache-Control': 'no-cache',
-        },
-      })
-      
-      if (!response.ok) {
-        throw new Error("Failed to fetch services")
-      }
-      
-      return response.json()
-    },
-    // Reduce cache time and enable background refetching
-    staleTime: 0, // Data is immediately stale
-    gcTime: 0, // Don't keep in cache
-    refetchOnMount: true,
-    refetchOnWindowFocus: true,
-    refetchInterval: 30000, // Refetch every 30 seconds
+    queryFn: fetchServices,
   })
 }
