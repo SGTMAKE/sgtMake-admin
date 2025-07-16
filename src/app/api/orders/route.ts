@@ -22,6 +22,9 @@ export async function GET() {
     }
 
     const orders = await db.order.findMany({
+      orderBy: {
+          orderDate: 'desc', // descending = sort -1
+      },
       include: {
         _count: {
           select: {

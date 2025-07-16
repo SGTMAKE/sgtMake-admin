@@ -120,7 +120,7 @@ export async function PUT(
         // Wait for all image movements to complete
         await Promise.all(moveTasks);
 
-        await cloudinary.api.delete_folder(`products/${dbProduct.slug}`);
+        // await cloudinary.api.delete_folder(`products/${dbProduct.slug}`);
 
         const images = await db.image.findMany({
           where: {

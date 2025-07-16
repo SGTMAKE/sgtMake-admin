@@ -63,10 +63,10 @@ export default function OrdersTable({ orders }: { orders?: OrderProps[] }) {
   const [visibleColumns, setVisibleColumns] = React.useState<Selection>(
     new Set(INITIAL_VISIBLE_COLUMNS),
   );
-  const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  const [rowsPerPage, setRowsPerPage] = React.useState(5);
   const [sortDescriptor, setSortDescriptor] = React.useState<SortDescriptor>({
     column: "total",
-    direction: "ascending",
+    direction: "descending",
   });
   const [page, setPage] = React.useState(1);
 

@@ -49,7 +49,7 @@ const INITIAL_VISIBLE_COLUMNS = ["id", "userId", "serviceType", "status", "creat
 export default function ServicesTable({ services }: { services?: ServiceProps[] }) {
   const [filterValue, setFilterValue] = React.useState("")
   const [visibleColumns, setVisibleColumns] = React.useState<Selection>(new Set(INITIAL_VISIBLE_COLUMNS))
-  const [rowsPerPage, setRowsPerPage] = React.useState(10)
+  const [rowsPerPage, setRowsPerPage] = React.useState(5)
   const [sortDescriptor, setSortDescriptor] = React.useState<SortDescriptor>({
     column: "createdAt",
     direction: "descending",
