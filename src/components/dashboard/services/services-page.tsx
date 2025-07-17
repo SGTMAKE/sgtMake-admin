@@ -1,22 +1,23 @@
 "use client"
 
-import { useServices } from "@/api-hooks/services/get-services"
 import SummaryCard from "@/components/dashboard/summary/summary-card"
 import type { ServiceProps } from "@/lib/types/service-types"
 import { Boxes, CalendarClock, Wrench, Zap } from "lucide-react"
 import ServicesTable from "./services-table"
 
-const ServicesPage = () => {
-  const { data } = useServices()
+interface ServicesPageProps {
+  services: ServiceProps[]
+}
 
-  function countServicesByType(services?: ServiceProps[], type?: string) {
+const ServicesPage = ({ services }: ServicesPageProps) => {
+  function countServicesByType(services: ServiceProps[], type?: string) {
     if (!services) return 0
     if (!type) return services.length
 
     return services.filter((service) => service.formDetails.type.toLowerCase().includes(type.toLowerCase())).length
   }
 
-  function findTodaysServices(services?: ServiceProps[]) {
+  function findTodaysServices(services: ServiceProps[]) {
     if (!services) return 0
 
     const today = new Date()
@@ -38,14 +39,14 @@ const ServicesPage = () => {
             color="text-primary"
             icon={Wrench}
             title="Battery Packs"
-            value={countServicesByType(data?.services, "batteryPack")}
+            value={countServicesByType(services, "batteryPack")}
           />
           <SummaryCard
             bgcolor="bg-warning"
             color="text-warning"
             icon={Zap}
             title="Wiring Harness"
-            value={countServicesByType(data?.services, "wiringHarness")}
+            value={countServicesByType(services, "wiringHarness")}
           />
           <SummaryCard
             bgcolor="bg-success"
@@ -53,9 +54,9 @@ const ServicesPage = () => {
             icon={Boxes}
             title="Manufacturing"
             value={
-              countServicesByType(data?.services, "cnc") +
-              countServicesByType(data?.services, "laser") +
-              countServicesByType(data?.services, "designing")
+              countServicesByType(services, "cnc") +
+              countServicesByType(services, "laser") +
+              countServicesByType(services, "designing")
             }
           />
           <SummaryCard
@@ -63,11 +64,11 @@ const ServicesPage = () => {
             color="text-[#23B7E5]"
             icon={CalendarClock}
             title="Today's Services"
-            value={findTodaysServices(data?.services)}
+            value={findTodaysServices(services)}
           />
         </div>
       </div>
-      <ServicesTable services={data?.services} />
+      <ServicesTable services={services} />
     </>
   )
 }

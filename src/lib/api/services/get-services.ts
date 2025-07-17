@@ -1,14 +1,31 @@
-import { ServiceResProps } from '@/lib/types/service-types';
-import axios from "@/config/axios.config";
-import { headers } from "next/headers";
-export async function getServicesServer() {
-  const headerSequence = headers();
-  const cookie = headerSequence.get("cookie");
-  const { data } = await axios.get("/api/services", {
-    headers: {
-      Cookie: `${cookie}`,
-    },
-  });
+import type { ServiceResProps } from "@/lib/types/service-types"
 
-  return data as ServiceResProps;
+export async function getServicesServer(): Promise<ServiceResProps> {
+  try {
+    const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3001"
+    const url = baseUrl.startsWith("http") ? baseUrl : `https://${baseUrl}`
+
+    const response = await fetch(`${url}/api/services`, {
+      cache: "no-store",
+      headers: {
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        Pragma: "no-cache",
+        Expires: "0",
+      },
+    })
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch services: ${response.status}`)
+    }
+
+    const data = await response.json()
+
+    return data
+  } catch (error) {
+    console.error("Error fetching services:", error)
+    return {
+      success: false,
+      services: [],
+    }
+  }
 }

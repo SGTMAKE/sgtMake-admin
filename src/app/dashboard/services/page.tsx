@@ -1,24 +1,24 @@
 import Tabs from "@/components/dashboard/services/tabs"
 import ServicesPage from "@/components/dashboard/services/services-page"
 import Nav from "@/components/nav/nav"
-import Hydrate from "@/lib/query-utils/hydrate-client";
-import { QueryClient, dehydrate } from "@tanstack/react-query";
-import { getServicesServer } from "@/lib/api/services/get-services";
+import { getServicesServer } from "@/lib/api/services/get-services"
+
+// Force dynamic rendering to prevent static generation
+export const dynamic = "force-dynamic"
+export const revalidate = 0
+
 export default async function ServicesPageContainer() {
-   const queryClient = new QueryClient();
-  await queryClient.prefetchQuery({
-    queryKey: ["services"],
-    queryFn: getServicesServer,
-  });
-  
-  const dehydratedState = dehydrate(queryClient);
+  // Fetch services data on the server
+  const servicesData = await getServicesServer()
+  const services = servicesData.success ? servicesData.services : []
+
   return (
-      <Nav>
-     <div className="container mx-auto px-4 py-8">
-      <Hydrate state={dehydratedState}>
-        <ServicesPage />
-      </Hydrate>
-    </div>
-      </Nav>
+    <Nav>
+      <div className="container mx-auto px-4 py-8">
+        <Tabs>
+          <ServicesPage services={services} />
+        </Tabs>
+      </div>
+    </Nav>
   )
 }
