@@ -63,6 +63,7 @@ export default function SimpleImageUpload({
           method: "POST",
           body: formData,
         })
+        console.log(response)
 
         if (!response.ok) {
           throw new Error("Upload failed")
@@ -84,7 +85,7 @@ export default function SimpleImageUpload({
         setPreviewUrl("")
         toast.success("Image uploaded successfully")
       } catch (error) {
-        console.error("Upload error:", error)
+        console.log("Upload error:", error)
         toast.error("Failed to upload image")
         setPreviewUrl("")
       } finally {
@@ -159,7 +160,7 @@ export default function SimpleImageUpload({
           {currentImageUrl && !previewUrl && (
             <div className="mt-2 flex items-center space-x-2 text-sm text-green-600 bg-green-50 p-2 rounded">
               <ImageIcon className="w-4 h-4" />
-              <span>Image uploaded successfully</span>
+              <span>Uploaded</span>
             </div>
           )}
         </div>

@@ -55,8 +55,8 @@ export async function POST(request: NextRequest) {
       publicId: (result as any).public_id,
     })
   } catch (error) {
-    console.error("Upload error:", error)
-    return NextResponse.json({ error: "Upload failed" }, { status: 500 })
+    console.log("Upload error:", error)
+    return NextResponse.json({ error: "Upload failed",rr:error }, { status: 500 })
   }
 }
 

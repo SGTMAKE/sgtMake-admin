@@ -28,7 +28,7 @@ const BestDeals = ({ deal }: { deal: BestDeal | null }) => {
             <Image
               src={dealData.imageUrl}
               alt="Product image"
-              className="aspect-video"
+              className="aspect-video z-0"
             />
             <div className="col-span-2 space-y-2">
               <h1 className="text-sm font-medium text-zinc-400">
