@@ -115,7 +115,7 @@ export const ImageUpload = forwardRef<ImageUploadRef, ImageUploadProps>(
         setPreviewUrl("")
         toast.success("Image uploaded successfully")
       } catch (error) {
-        console.error("Upload error:", error)
+        console.log("Upload error:", error)
         toast.error("Failed to upload image")
         throw error // Re-throw to handle in parent component
       } finally {

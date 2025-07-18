@@ -365,7 +365,7 @@ export const getServiceStatusEmailTemplate = (service: ServiceProps, status: Ser
     <body>
       <div class="email-container">
         <div class="email-header">
-          <img src="https://media.licdn.com/dms/image/v2/D4D0BAQElFcX8-brRSA/company-logo_200_200/B4DZUx2Y_qHYAI-/0/1740298099195/sgtmake_logo?e=2147483647&v=beta&t=56h6EkagixhRNExEoUlMoreDVa5bDOWus3eZ55hz0ZE" alt="SGTMake Logo" class="logo">
+          <img src="https://www.sgtmake.com/logo.png" alt="SGTMake Logo" class="logo">
           <h1>Service Status Update</h1>
         </div>
         

@@ -590,16 +590,16 @@ export const getOrderStatusEmailTemplate = (order: any, status: OrderStatus) => 
         
         <div class="email-footer">
           <div class="social-links">
-            <a href="https://facebook.com/sgtmake" class="social-link">Facebook</a>
-            <a href="https://twitter.com/sgtmake" class="social-link">Twitter</a>
-            <a href="https://instagram.com/sgtmake" class="social-link">Instagram</a>
+            <a href="https://www.facebook.com/share/1XKtj5HDHx/" class="social-link">Facebook</a>
+            <a href="https://www.linkedin.com/company/sgtmake/" class="social-link">LinkedIn</a>
+            <a href="https://www.instagram.com/sgt.make?igsh=MTNhZXJnZm5iMDZzdA==" class="social-link">Instagram</a>
           </div>
           
           <p>© ${new Date().getFullYear()} SGTMake. All rights reserved.</p>
           
           <div class="footer-links">
             <a href="${process.env.URL || "https://sgtmake.com"}/privacy-policy" class="footer-link">Privacy Policy</a>
-            <a href="${process.env.URL || "https://sgtmake.com"}/terms-of-service" class="footer-link">Terms of Service</a>
+            <a href="${process.env.URL || "https://sgtmake.com"}/support" class="footer-link">Terms of Service</a>
           </div>
         </div>
       </div>
