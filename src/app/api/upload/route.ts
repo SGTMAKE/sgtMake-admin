@@ -1,17 +1,12 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+
 import { cloudinary } from "@/config/cloudinary.config"
 
-
+import { Readable } from "stream";
 
 export async function POST(request: NextRequest) {
   try {
-    // const session = await getServerSession(authOptions)
-
-    // if (!session?.user?.isAdmin) {
-    //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    // }
+  
 
     const formData = await request.formData()
     const file = formData.get("file") as File
@@ -40,20 +35,37 @@ export async function POST(request: NextRequest) {
     if (height) uploadOptions.height = Number.parseInt(height)
     if (width || height) uploadOptions.crop = "fill"
 
-    const result = await new Promise((resolve, reject) => {
-      cloudinary.uploader
-        .upload_stream(uploadOptions, (error, result) => {
-          if (error) reject(error)
-          else resolve(result)
-        })
-        .end(buffer)
-    })
+    return new Promise((resolve) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        uploadOptions
+       ,
+        (error, result) => {
+          if (error) {
+            console.error("Cloudinary upload error:", error);
+            resolve(
+              NextResponse.json({ error: "Error uploading file to Cloudinary" }, { status: 500 })
+            );
+          } else {
+            
+            resolve(
+              NextResponse.json({
+                url: result?.secure_url,
+                publicId: result?.public_id,
+               
+              })
+            );
+          }
+        }
+      );
 
-    return NextResponse.json({
-      success: true,
-      url: (result as any).secure_url,
-      publicId: (result as any).public_id,
-    })
+      // Create a readable stream from the buffer and pipe it to the upload stream
+      const readableStream = new Readable();
+      readableStream.push(buffer);
+      readableStream.push(null);
+      readableStream.pipe(uploadStream);
+    });
+
+   
   } catch (error) {
     console.log("Upload error:", error)
     return NextResponse.json({ error: "Upload failed",rr:error }, { status: 500 })
