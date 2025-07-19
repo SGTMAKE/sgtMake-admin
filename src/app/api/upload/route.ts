@@ -39,10 +39,9 @@ export async function POST(request: NextRequest) {
     if (height) uploadOptions.height = Number.parseInt(height)
     if (width || height) uploadOptions.crop = "fill"
 
-    return new Promise((resolve) => {
+    return new Promise<Response>((resolve) => {
       const uploadStream = cloudinary.uploader.upload_stream(
-        uploadOptions
-       ,
+        uploadOptions,
         (error, result) => {
           if (error) {
             console.error("Cloudinary upload error:", error);
@@ -50,19 +49,17 @@ export async function POST(request: NextRequest) {
               NextResponse.json({ error: "Error uploading file to Cloudinary" }, { status: 500 })
             );
           } else {
-            
             resolve(
               NextResponse.json({
-               success: true,
-      url: (result as any).secure_url,
-      publicId: (result as any).public_id,
+                success: true,
+                url: (result as any).secure_url,
+                publicId: (result as any).public_id,
               })
             );
           }
         }
       );
 
-      // Create a readable stream from the buffer and pipe it to the upload stream
       const readableStream = new Readable();
       readableStream.push(buffer);
       readableStream.push(null);
