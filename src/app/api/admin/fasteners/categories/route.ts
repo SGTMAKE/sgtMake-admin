@@ -49,21 +49,13 @@ export async function POST(request: Request) {
       try {
         const bytes = await imageFile.arrayBuffer()
         const buffer = Buffer.from(bytes)
+        // Convert buffer to base64 data URI
+        const dataUri = `data:${imageFile.type};base64,${buffer.toString("base64")}`
 
-        const uploadResult = (await new Promise((resolve, reject) => {
-          cloudinary.uploader
-            .upload_stream(
-              {
-                resource_type: "image",
-                folder: "fastener-categories",
-              },
-              (error, result) => {
-                if (error) reject(error)
-                else resolve(result)
-              },
-            )
-            .end(buffer)
-        })) as any
+        const uploadResult = await cloudinary.uploader.upload(dataUri, {
+          resource_type: "image",
+          folder: "fastener-categories",
+        })
 
         imagePublicId = uploadResult.public_id
       } catch (error) {
