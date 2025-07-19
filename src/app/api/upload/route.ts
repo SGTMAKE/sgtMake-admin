@@ -2,74 +2,46 @@ import { type NextRequest, NextResponse } from "next/server"
 
 import { cloudinary } from "@/config/cloudinary.config"
 
-import { Readable } from "stream";
-
 export async function POST(request: NextRequest) {
   try {
-    // const session = await getServerSession(authOptions)
-
-    // if (!session?.user?.isAdmin) {
-    //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    // }
-
     const formData = await request.formData()
     const file = formData.get("file") as File
     const quality = (formData.get("quality") as string) || "auto"
     const width = formData.get("width") as string
     const height = formData.get("height") as string
+    const type = (formData.get("type") as string) || "connectors" // or wires
 
     if (!file) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 })
     }
 
-    // Convert file to buffer
+    // Convert file to buffer and then to data URI
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
+    const dataUri = `data:${file.type};base64,${buffer.toString("base64")}`
 
-    // Upload to Cloudinary with optimization
+    // Prepare Cloudinary upload options
     const uploadOptions: any = {
       resource_type: "image",
       quality: quality,
-      format: "webp", // Convert to WebP for better compression
-      folder: "sgtmake/categories",
+      format: "webp",
+      folder:"sgtmake/categories",
     }
-
-    // Add dimensions if provided (for option images)
     if (width) uploadOptions.width = Number.parseInt(width)
     if (height) uploadOptions.height = Number.parseInt(height)
     if (width || height) uploadOptions.crop = "fill"
 
-    return new Promise<Response>((resolve) => {
-      const uploadStream = cloudinary.uploader.upload_stream(
-        uploadOptions,
-        (error, result) => {
-          if (error) {
-            console.error("Cloudinary upload error:", error);
-            resolve(
-              NextResponse.json({ error: "Error uploading file to Cloudinary" }, { status: 500 })
-            );
-          } else {
-            resolve(
-              NextResponse.json({
-                success: true,
-                url: (result as any).secure_url,
-                publicId: (result as any).public_id,
-              })
-            );
-          }
-        }
-      );
+    // Upload to Cloudinary
+    const uploadResult = await cloudinary.uploader.upload(dataUri, uploadOptions)
 
-      const readableStream = new Readable();
-      readableStream.push(buffer);
-      readableStream.push(null);
-      readableStream.pipe(uploadStream);
-    });
-
-   
+    return NextResponse.json({
+      success: true,
+      url: uploadResult.secure_url,
+      publicId: uploadResult.public_id,
+    })
   } catch (error) {
     console.log("Upload error:", error)
-    return NextResponse.json({ error: "Upload failed",rr:error }, { status: 500 })
+    return NextResponse.json({ error: "Upload failed", rr: error }, { status: 500 })
   }
 }
 
