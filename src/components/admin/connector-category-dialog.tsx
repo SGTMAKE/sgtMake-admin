@@ -9,7 +9,6 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
-import SimpleImageUpload from "./simple-image-upload"
 import { toast } from "sonner"
 
 interface ConnectorCategoryDialogProps {
@@ -30,10 +29,10 @@ export function ConnectorCategoryDialog({
   const [formData, setFormData] = useState({
     name: "",
     description: "",
-    image: "",
-    publicId: "",
     isActive: true,
   })
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string>("")
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
@@ -41,30 +40,59 @@ export function ConnectorCategoryDialog({
       setFormData({
         name: category.name || "",
         description: category.description || "",
-        image: category.image || "",
-        publicId: category.publicId || "",
         isActive: category.isActive ?? true,
       })
+      // For existing categories, show current image if it exists
+      if (category.image) {
+        // Convert Cloudinary public_id to full URL
+        const imageUrl = category.image.startsWith("http")
+          ? category.image
+          : `${process.env.NEXT_PUBLIC_IMAGE_URL}/image/upload/${category.image}`
+        setPreviewUrl(imageUrl)
+      }
     } else {
       setFormData({
         name: "",
         description: "",
-        image: "",
-        publicId: "",
         isActive: true,
       })
+      setPreviewUrl("")
+      setImageFile(null)
     }
   }, [category])
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setImageFile(file)
+      const url = URL.createObjectURL(file)
+      setPreviewUrl(url)
+    }
+  }
+
+  const handleImageRemove = () => {
+    setImageFile(null)
+    setPreviewUrl("")
+  }
 
   const mutation = useMutation({
     mutationFn: async (data: any) => {
       const url = category ? `/api/admin/connectors/categories/${category.id}` : "/api/admin/connectors/categories"
       const method = category ? "PUT" : "POST"
 
+      const formDataToSend = new FormData()
+      formDataToSend.append("name", data.name)
+      formDataToSend.append("description", data.description)
+      formDataToSend.append("isActive", data.isActive.toString())
+      formDataToSend.append("type", type)
+
+      if (imageFile) {
+        formDataToSend.append("image", imageFile)
+      }
+
       const response = await fetch(url, {
         method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...data, type }),
+        body: formDataToSend,
       })
 
       if (!response.ok) throw new Error("Failed to save category")
@@ -82,22 +110,6 @@ export function ConnectorCategoryDialog({
       setIsSubmitting(false)
     },
   })
-
-  const handleImageChange = (url: string, publicId?: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      image: url,
-      publicId: publicId || "",
-    }))
-  }
-
-  const handleImageRemove = () => {
-    setFormData((prev) => ({
-      ...prev,
-      image: "",
-      publicId: "",
-    }))
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -174,14 +186,42 @@ export function ConnectorCategoryDialog({
             />
           </div>
 
-          <SimpleImageUpload
-            currentImageUrl={formData.image}
-            currentPublicId={formData.publicId}
-            onImageChange={handleImageChange}
-            onImageRemove={handleImageRemove}
-            label="Category Image"
-            disabled={isLoading}
-          />
+          <div>
+            <Label htmlFor="image" className="text-sm font-medium">
+              Category Image
+            </Label>
+            {previewUrl && (
+              <div className="relative w-32 h-32 rounded-md overflow-hidden mt-2">
+                <img
+                  src={previewUrl || "/placeholder.svg"}
+                  alt="Category Preview"
+                  className="object-cover w-full h-full"
+                />
+                <Button
+                  type="button"
+                  onClick={handleImageRemove}
+                  className="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+                    <path
+                      fillRule="evenodd"
+                      d="M5.47 5.47a.75.75 0 011.06 0L12 10.94l5.47-5.47a.75.75 0 111.06 1.06L13.06 12l5.47 5.47a.75.75 0 11-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 01-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 010-1.06z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  <span className="sr-only">Remove image</span>
+                </Button>
+              </div>
+            )}
+            <Input
+              id="image"
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="mt-2 focus:ring-orange-500 focus:border-orange-500"
+              disabled={isLoading}
+            />
+          </div>
 
           <div className="flex items-center space-x-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
             <Switch

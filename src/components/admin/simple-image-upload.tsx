@@ -120,13 +120,13 @@ export default function SimpleImageUpload({
       {/* <Label className="text-sm font-medium">{label}</Label> */}
 
       {hasImage && (
-        <div className="relative inline-block mx-auto">
-          <div className="relative w-full h-48 pl-6 border rounded-lg overflow-hidden bg-gray-50">
+        <div className="relative flex justify-center items-center h-48 w-48  mx-auto">
+          <div className="relative   h-48 w-48 pl-6 border rounded-lg overflow-hidden bg-gray-50 mx-auto">
             <Image
               src={displayUrl || "/placeholder.svg"}
               alt="Preview"
               fill
-              className="object-cover "
+              className="object-cover mx-auto "
               onError={(e) => {
                 e.currentTarget.src = "/placeholder.svg?height=200&width=300"
               }}
@@ -158,7 +158,7 @@ export default function SimpleImageUpload({
           )}
 
           {currentImageUrl && !previewUrl && (
-            <div className="mt-2 flex items-center space-x-2 text-sm text-green-600 bg-green-50 p-2 rounded">
+            <div className=" absolute -bottom-2 -right-4 mt-2 flex items-center space-x-2 px-2 rounded-full text-sm text-green-600 border-2 border-green-500 bg-green-50 p-1 ">
               <ImageIcon className="w-4 h-4" />
               <span>Uploaded</span>
             </div>

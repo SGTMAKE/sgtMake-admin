@@ -88,7 +88,7 @@ class EmailService {
     this.transporter = nodemailer.createTransport({
       host: "smtp.zoho.in",
       port: 465,
-      secure: false,
+      secure: true,
       auth: {
         user: process.env.ZOHO_EMAIL,
         pass: process.env.ZOHO_PASSWORD,
@@ -99,7 +99,7 @@ class EmailService {
   private async sendEmail(config: EmailConfig): Promise<void> {
     try {
       const mailOptions = {
-        from: `"SGTMake" <${process.env.ZOHO_EMAIL_USER}>`,
+        from: `"SGTMake" <${process.env.ZOHO_EMAIL}>`,
         to: Array.isArray(config.to) ? config.to.join(", ") : config.to,
         cc: config.cc?.join(", "),
         subject: config.subject,

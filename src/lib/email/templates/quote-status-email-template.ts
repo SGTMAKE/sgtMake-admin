@@ -204,7 +204,7 @@ export function generateQuoteStatusEmailTemplate(data: QuoteStatusEmailData): st
                         <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://sgtmake.com"}/quotes" class="btn btn-primary">
                             ✅ View & Accept Quote
                         </a>
-                        <a href="mailto:${process.env.ADMIN_EMAIL || "admin@sgtmake.com"}?subject=Quote%20Inquiry%20%23${data.quoteRequestId.slice(-8)}" class="btn btn-secondary">
+                        <a href="mailto:${process.env.ADMIN_EMAIL || "support@sgtmake.com"}?subject=Quote%20Inquiry%20%23${data.quoteRequestId.slice(-8)}" class="btn btn-secondary">
                             💬 Ask Questions
                         </a>
                     </div>
@@ -215,7 +215,7 @@ export function generateQuoteStatusEmailTemplate(data: QuoteStatusEmailData): st
                 <div style="background: #f0f9ff; padding: 15px; border-radius: 8px; margin: 20px 0; border: 1px solid #0ea5e9;">
                     <h4 style="margin: 0 0 10px 0; color: #0c4a6e;">📞 Need Help?</h4>
                     <p style="margin: 0; font-size: 14px; color: #0c4a6e;">
-                        Our team is here to help! Contact us at <strong>${process.env.ADMIN_EMAIL || "admin@sgtmake.com"}</strong> 
+                        Our team is here to help! Contact us at <strong>${process.env.ADMIN_EMAIL || "support@sgtmake.com"}</strong> 
                         for any questions about your quote.
                     </p>
                 </div>

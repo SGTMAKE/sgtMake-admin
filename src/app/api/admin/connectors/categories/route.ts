@@ -1,16 +1,16 @@
 import { NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
-import {db} from "@/lib/prisma"
+import { db } from "@/lib/prisma"
+import { v2 as cloudinary } from "cloudinary"
+
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+})
 
 export async function GET(request: Request) {
   try {
-    // const session = await getServerSession(authOptions)
-
-    // if (!session?.user?.isAdmin) {
-    //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    // }
-
     const { searchParams } = new URL(request.url)
     const type = searchParams.get("type") // 'connectors' or 'wires'
 
@@ -47,17 +47,44 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    // const session = await getServerSession(authOptions)
-
-    // if (!session?.user?.isAdmin) {
-    //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    // }
-
-    const body = await request.json()
-    const { name, description, image, isActive, type } = body
+    const formData = await request.formData()
+    const name = formData.get("name") as string
+    const description = formData.get("description") as string
+    const isActive = formData.get("isActive") === "true"
+    const type = formData.get("type") as string
+    const imageFile = formData.get("image") as File | null
 
     if (!name || !type) {
       return NextResponse.json({ error: "Name and type are required" }, { status: 400 })
+    }
+
+    let imagePublicId = ""
+
+    // Upload image to Cloudinary if provided
+    if (imageFile) {
+      try {
+        const bytes = await imageFile.arrayBuffer()
+        const buffer = Buffer.from(bytes)
+
+        const uploadResult = (await new Promise((resolve, reject) => {
+          cloudinary.uploader
+            .upload_stream(
+              {
+                resource_type: "image",
+                folder: type === "wires" ? "wire-categories" : "connector-categories",
+              },
+              (error, result) => {
+                if (error) reject(error)
+                else resolve(result)
+              },
+            )
+            .end(buffer)
+        })) as any
+
+        imagePublicId = uploadResult.public_id
+      } catch (error) {
+        console.error("Error uploading image:", error)
+      }
     }
 
     let category
@@ -66,8 +93,8 @@ export async function POST(request: Request) {
         data: {
           name,
           description,
-          image,
-          isActive: isActive ?? true,
+          image: imagePublicId,
+          isActive,
         },
       })
     } else {
@@ -75,8 +102,8 @@ export async function POST(request: Request) {
         data: {
           name,
           description,
-          image,
-          isActive: isActive ?? true,
+          image: imagePublicId,
+          isActive,
         },
       })
     }

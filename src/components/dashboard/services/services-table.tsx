@@ -83,7 +83,7 @@ export default function ServicesTable({ services }: { services?: ServiceProps[] 
       filteredServices = filteredServices.filter(
         (service) =>
           service.id.toLowerCase().includes(filterValue.toLowerCase()) ||
-          service.formDetails.type.toLowerCase().includes(filterValue.toLowerCase()),
+          service.type.toLowerCase().includes(filterValue.toLowerCase()),
       )
     }
 
@@ -120,20 +120,20 @@ export default function ServicesTable({ services }: { services?: ServiceProps[] 
           <Chip
             className="capitalize"
             color={
-              service.formDetails.type === "batteryPack"
+              service.type === "batteryPack"
                 ? "primary"
-                : service.formDetails.type === "wiringHarness"
+                : service.type === "wiringHarness"
                   ? "warning"
-                  : service.formDetails.type.includes("cnc")
+                  : service.type.includes("cnc")
                     ? "success"
-                    : service.formDetails.type.includes("laser")
+                    : service.type.includes("laser")
                       ? "danger"
                       : "default"
             }
             size="sm"
             variant="flat"
           >
-            {service.formDetails.type}
+            {service.type}
           </Chip>
         )
       case "createdAt":

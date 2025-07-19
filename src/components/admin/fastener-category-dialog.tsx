@@ -9,7 +9,6 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
-import SimpleImageUpload from "./simple-image-upload"
 import { toast } from "sonner"
 
 interface FastenerCategoryDialogProps {
@@ -23,10 +22,10 @@ export function FastenerCategoryDialog({ open, onOpenChange, category, onSuccess
   const [formData, setFormData] = useState({
     name: "",
     description: "",
-    image: "",
-    publicId: "",
     isActive: true,
   })
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string>("")
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
@@ -34,30 +33,58 @@ export function FastenerCategoryDialog({ open, onOpenChange, category, onSuccess
       setFormData({
         name: category.name || "",
         description: category.description || "",
-        image: category.image || "",
-        publicId: category.publicId || "",
         isActive: category.isActive ?? true,
       })
+      // For existing categories, show current image if it exists
+      if (category.image) {
+        // Convert Cloudinary public_id to full URL
+        const imageUrl = category.image.startsWith("http")
+          ? category.image
+          : `${process.env.NEXT_PUBLIC_IMAGE_URL}/image/upload/${category.image}`
+        setPreviewUrl(imageUrl)
+      }
     } else {
       setFormData({
         name: "",
         description: "",
-        image: "",
-        publicId: "",
         isActive: true,
       })
+      setPreviewUrl("")
+      setImageFile(null)
     }
   }, [category])
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setImageFile(file)
+      const url = URL.createObjectURL(file)
+      setPreviewUrl(url)
+    }
+  }
+
+  const handleImageRemove = () => {
+    setImageFile(null)
+    setPreviewUrl("")
+  }
 
   const mutation = useMutation({
     mutationFn: async (data: any) => {
       const url = category ? `/api/admin/fasteners/categories/${category.id}` : "/api/admin/fasteners/categories"
       const method = category ? "PUT" : "POST"
 
+      const formDataToSend = new FormData()
+      formDataToSend.append("name", data.name)
+      formDataToSend.append("description", data.description)
+      formDataToSend.append("isActive", data.isActive.toString())
+
+      if (imageFile) {
+        formDataToSend.append("image", imageFile)
+      }
+
       const response = await fetch(url, {
         method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: formDataToSend,
       })
 
       if (!response.ok) throw new Error("Failed to save category")
@@ -75,22 +102,6 @@ export function FastenerCategoryDialog({ open, onOpenChange, category, onSuccess
       setIsSubmitting(false)
     },
   })
-
-  const handleImageChange = (url: string, publicId?: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      image: url,
-      publicId: publicId || "",
-    }))
-  }
-
-  const handleImageRemove = () => {
-    setFormData((prev) => ({
-      ...prev,
-      image: "",
-      publicId: "",
-    }))
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -166,14 +177,36 @@ export function FastenerCategoryDialog({ open, onOpenChange, category, onSuccess
             />
           </div>
 
-          <SimpleImageUpload
-            currentImageUrl={formData.image}
-            currentPublicId={formData.publicId}
-            onImageChange={handleImageChange}
-            onImageRemove={handleImageRemove}
-            label="Category Image"
-            disabled={isLoading}
-          />
+          <div className="space-y-2">
+            <Label htmlFor="image" className="text-sm font-medium">
+              Category Image
+            </Label>
+            <Input
+              id="image"
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              disabled={isLoading}
+              className="focus:ring-orange-500 focus:border-orange-500"
+            />
+            {previewUrl && (
+              <div className="relative">
+                <img
+                  src={previewUrl || "/placeholder.svg"}
+                  alt="Preview"
+                  className="w-full h-32 object-cover rounded-lg border"
+                />
+                <button
+                  type="button"
+                  onClick={handleImageRemove}
+                  className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
+                  disabled={isLoading}
+                >
+                  ×
+                </button>
+              </div>
+            )}
+          </div>
 
           <div className="flex items-center space-x-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
             <Switch

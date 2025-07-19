@@ -14,7 +14,7 @@ const ServicesPage = ({ services }: ServicesPageProps) => {
     if (!services) return 0
     if (!type) return services.length
 
-    return services.filter((service) => service.formDetails.type.toLowerCase().includes(type.toLowerCase())).length
+    return services.filter((service) => service.type.toLowerCase().includes(type.toLowerCase())).length
   }
 
   function findTodaysServices(services: ServiceProps[]) {
@@ -52,12 +52,22 @@ const ServicesPage = ({ services }: ServicesPageProps) => {
             bgcolor="bg-success"
             color="text-success"
             icon={Boxes}
-            title="Manufacturing"
-            value={
-              countServicesByType(services, "cnc") +
-              countServicesByType(services, "laser") +
-              countServicesByType(services, "designing")
-            }
+            title="CNC Machining"
+            value={countServicesByType(services, "cnc")}
+          />
+          <SummaryCard
+            bgcolor="bg-success"
+            color="text-success"
+            icon={Boxes}
+            title="Laser Cutting"
+            value={countServicesByType(services, "laser")}
+          />
+          <SummaryCard
+            bgcolor="bg-success"
+            color="text-success"
+            icon={Boxes}
+            title="3D Printing"
+            value={countServicesByType(services, "designing")}
           />
           <SummaryCard
             bgcolor="bg-[#23B7E5]"

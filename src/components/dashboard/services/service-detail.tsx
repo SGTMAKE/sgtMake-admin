@@ -43,7 +43,7 @@ export default function ServiceDetailClient({ id }: ServiceDetailClientProps) {
 
   // Helper function to render form details based on service type
   const renderFormDetails = () => {
-    const { type } = service.formDetails
+    const { type } = service
 
     if (type === "batteryPack") {
       return (
@@ -86,12 +86,12 @@ export default function ServiceDetailClient({ id }: ServiceDetailClientProps) {
     } else if (type.includes("cnc") || type.includes("laser") || type.includes("3d-printing")) {
       return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <DetailItem label="Service Type" value={service.formDetails.type} />
+          <DetailItem label="Service Type" value={service.type} />
           <DetailItem label="Material" value={service.formDetails.material} />
           <DetailItem label="Surface Finish" value={service.formDetails.surfaceFinish ? "Yes" : "No"} />
           <DetailItem label="Quantity" value={service.formDetails.quantity} />
 
-          {service.formDetails.type === "3d-printing" && (
+          {service.type === "3d-printing" && (
             <>
               <DetailItem label="PrintType" value={service.formDetails.printType} />
             </>
@@ -124,7 +124,7 @@ export default function ServiceDetailClient({ id }: ServiceDetailClientProps) {
       <div className="rounded-lg shadow-md p-6">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Service Details</h1>
-          <span className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">{service.formDetails.type}</span>
+          <span className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">{service.type}</span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">

@@ -149,7 +149,7 @@ const ConnectorsWiresAdmin = () => {
                           {category.image && (
                             <div className="relative w-full h-32 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
                               <Image
-                                src={category.image || "/placeholder.svg"}
+                                src={category.image.startsWith("http")? category.image: `${process.env.NEXT_PUBLIC_IMAGE_URL}/image/upload/${category.image}` || "/placeholder.svg"}
                                 alt={category.name}
                                 fill
                                 className="object-cover"
