@@ -6,7 +6,11 @@ import { Readable } from "stream";
 
 export async function POST(request: NextRequest) {
   try {
-  
+    // const session = await getServerSession(authOptions)
+
+    // if (!session?.user?.isAdmin) {
+    //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    // }
 
     const formData = await request.formData()
     const file = formData.get("file") as File
@@ -49,9 +53,9 @@ export async function POST(request: NextRequest) {
             
             resolve(
               NextResponse.json({
-                url: result?.secure_url,
-                publicId: result?.public_id,
-               
+               success: true,
+      url: (result as any).secure_url,
+      publicId: (result as any).public_id,
               })
             );
           }
