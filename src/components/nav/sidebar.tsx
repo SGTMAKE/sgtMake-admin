@@ -153,8 +153,8 @@ const Sidebar = () => {
                   menus: [
                     { title: "Categories", url: "/products/categories" },
                     { title: "Products", url: "/products" },
-                    { title: "Fasteners", url: "/dashboard/fasteners" },
-                    { title: "Connectors & Wires", url: "/dashboard/connectors-wires" },
+                    { title: "Fasteners", url: "/fasteners" },
+                    { title: "Connectors & Wires", url: "/connectors-wires" },
                   ],
                 }}
               />
