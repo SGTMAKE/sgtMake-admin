@@ -53,6 +53,7 @@ export async function GET(req: NextRequest, { params }: { params: { oid: string 
         payment_verified: order.payment_verified,
         status: order.status === "placed" ? "pending" : order.status,
         addressId: order.addressId,
+        currency: order.currency,
         User: {
           id: order.userId,
           name: order.User.name,

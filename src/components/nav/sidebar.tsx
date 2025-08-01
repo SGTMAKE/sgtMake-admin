@@ -151,8 +151,10 @@ const Sidebar = () => {
                   name: "Catalog",
                   icon: BookText,
                   menus: [
-                    { title: "Products", url: "/products" },
                     { title: "Categories", url: "/products/categories" },
+                    { title: "Products", url: "/products" },
+                    { title: "Fasteners", url: "/dashboard/fasteners" },
+                    { title: "Connectors & Wires", url: "/dashboard/connectors-wires" },
                   ],
                 }}
               />

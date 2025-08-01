@@ -145,6 +145,7 @@ model Order {
   User             User        @relation(fields: [userId], references: [id])
   OrderItem        OrderItem[]
   Payment          Payment?
+  currency       String?
 }
 
 model OrderItem {

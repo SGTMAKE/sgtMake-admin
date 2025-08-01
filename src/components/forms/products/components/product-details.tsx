@@ -3,8 +3,10 @@ import {
   FormControl,
   FormField,
   FormItem,
+  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import TiptapEditor from "@/components/ui/tiptap-editor";
 import { ProductFormProps } from "@/lib/types/types";
 import { Button, Input, Select, SelectItem, Textarea } from "@nextui-org/react";
 
@@ -104,25 +106,20 @@ const ProductDetails = ({ form }: ProductFormProps) => {
         name="description"
         render={({ field }) => (
           <FormItem className="mt-3">
+            <FormLabel>Product Description</FormLabel>
             <FormControl>
-              <Textarea
-                placeholder="Description"
-                label="Description"
-                labelPlacement="outside"
-                radius="sm"
-                variant="faded"
-                classNames={{
-                  label: "text-sm font-medium z-0",
-                  inputWrapper:
-                    "border border-slate-200 bg-gray-50 dark:border-zinc-800 dark:bg-zinc-800/50",
-                }}
-                {...field}
+              <TiptapEditor
+                content={field.value}
+                onChange={field.onChange}
+                placeholder="Write a detailed product description..."
+                className="min-h-[300px]"
               />
             </FormControl>
             <FormMessage />
           </FormItem>
         )}
       />
+     
       <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
         <FormField
           control={form.control}

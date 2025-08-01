@@ -1,4 +1,3 @@
-import { formatCurrency } from "@/lib/utils";
 import { Card, CardBody } from "@nextui-org/react";
 import { CreditCard } from "lucide-react";
 
@@ -10,9 +9,19 @@ type PaymentDetailsProps = {
   amount: number;
   method: string;
   via: string;
+  
 };
+export function formatCurrencyWithLocale(amount: number, currency: string, locale = "en-US") {
+  const formatter = new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency: currency,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  })
+  return formatter.format(amount)
+}
 
-const PaymentDetails = ({ data }: { data: PaymentDetailsProps }) => {
+const PaymentDetails = ({ data ,currency="INR" }: { data: PaymentDetailsProps,currency?: string }) => {
   return (
     <Card className="mt-5 rounded-sm shadow-sm">
       <CardBody className="p-0">
@@ -56,7 +65,7 @@ const PaymentDetails = ({ data }: { data: PaymentDetailsProps }) => {
             <li className="text-[#878a99]">
               Total Amount:{" "}
               <span className="font-medium text-black dark:text-white">
-                {formatCurrency(data.amount)}
+                {formatCurrencyWithLocale(data.amount,currency)}
               </span>
             </li>
           </ul>
