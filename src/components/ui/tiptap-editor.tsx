@@ -249,10 +249,10 @@ const TiptapEditor = ({
 
   return (
     <div
-      className={cn("border rounded-xl overflow-hidden bg-white dark:bg-gray-900 shadow-sm", disabled && "opacity-50")}
+      className={cn("border rounded-xl overflow-hidden bg-white dark:bg-dark shadow-sm", disabled && "opacity-50")}
     >
       {/* Toolbar */}
-      <div className="border-b bg-gray-50 dark:bg-gray-800 p-3">
+      <div className="border-b bg-gray-50 dark:bg-dark p-3">
         <div className="flex flex-wrap items-center gap-1">
           {/* Text Formatting */}
           <div className="flex items-center gap-1 bg-white dark:bg-gray-900 rounded-lg p-1 border">
@@ -510,7 +510,7 @@ const TiptapEditor = ({
       </div>
 
       {/* Editor Content */}
-      <div className="min-h-[300px] max-h-[500px] overflow-y-auto bg-white dark:bg-gray-900">
+      <div className="min-h-[300px] max-h-[500px] overflow-y-auto bg-white dark:bg-[#424242]">
         <EditorContent editor={editor} />
       </div>
 

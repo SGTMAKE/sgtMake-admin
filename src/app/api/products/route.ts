@@ -70,6 +70,7 @@ export async function GET() {
       })),
     });
   } catch (error) {
+    console.log(error)
     return error500({});
   }
 }
@@ -120,7 +121,7 @@ export async function POST(req: NextRequest) {
           keywords: data.keywords.replace(/\s/g, "").split(","),
           Image: {
             createMany: {
-              data: response.map((res) => ({ imagePublicId: res.public_id })),
+              data: response.map((res) => ({ imagePublicId: res.public_id , colorVariant: res.public_id.split("/").at(2) || "default" })),
             },
           },
         },

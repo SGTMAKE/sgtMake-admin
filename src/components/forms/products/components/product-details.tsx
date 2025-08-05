@@ -10,6 +10,7 @@ import TiptapEditor from "@/components/ui/tiptap-editor";
 import { ProductFormProps } from "@/lib/types/types";
 import { Button, Input, Select, SelectItem, Textarea } from "@nextui-org/react";
 
+
 const ProductDetails = ({ form }: ProductFormProps) => {
   function generateSlug() {
     const name = form.getValues("title");
@@ -108,12 +109,10 @@ const ProductDetails = ({ form }: ProductFormProps) => {
           <FormItem className="mt-3">
             <FormLabel>Product Description</FormLabel>
             <FormControl>
-              <TiptapEditor
-                content={field.value}
+              <TiptapEditor content={field.value}
                 onChange={field.onChange}
                 placeholder="Write a detailed product description..."
-                className="min-h-[300px]"
-              />
+                className="min-h-[300px]"/>
             </FormControl>
             <FormMessage />
           </FormItem>

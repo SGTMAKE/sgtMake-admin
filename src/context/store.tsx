@@ -25,7 +25,7 @@ export const GlobalContextProvider = ({
 }: {
   children: ReactNode;
 }) => {
-  const [colorVariants, setColorVariants] = useState<ColorVariant[]>([]);
+  const [colorVariants, setColorVariants] = useState<ColorVariant[]>([{ color: "", thumbnail: "", others: [] }]);
   return (
     <GlobalContext.Provider
       value={{

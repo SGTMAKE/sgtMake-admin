@@ -11,7 +11,6 @@ import ProductDetails from "./components/product-details";
 import ProductOptions from "./components/product-options";
 import { useGlobalContext } from "@/context/store";
 import { useAddProduct } from "@/api-hooks/products/add-product";
-import { useEffect } from "react";
 
 const AddProductForm = () => {
   const { colorVariants, setColorVariants } = useGlobalContext();
@@ -34,9 +33,7 @@ const AddProductForm = () => {
     },
   });
 
-  useEffect(() => {
-    setColorVariants([]);
-  }, []);
+ 
 
   const onSuccess = () => {
     toast.success("Product added successfully.");

@@ -125,7 +125,7 @@ model Image {
   imagePublicId String
   productId     String  @db.ObjectId
   Product       Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-
+  colorVariant  String
 
   @@unique([productId, id])
 }

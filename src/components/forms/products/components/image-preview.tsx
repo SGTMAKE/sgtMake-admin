@@ -1,34 +1,25 @@
-import { useGlobalContext } from "@/context/store";
-import { ImagePreviewProps } from "@/lib/types/types";
-import { Trash2 } from "lucide-react";
-import Image from "next/image";
 
-const ImagePreview = ({
-  image,
-  variantIndex,
-  imageIndex,
-  action,
-}: ImagePreviewProps) => {
-  const { setColorVariants } = useGlobalContext();
+import { useGlobalContext } from "@/context/store"
+import type { ImagePreviewProps } from "@/lib/types/types"
+import { Trash2 } from "lucide-react"
+import Image from "next/image"
+
+const ImagePreview = ({ image, variantIndex, imageIndex, action }: ImagePreviewProps) => {
+  const { setColorVariants } = useGlobalContext()
 
   function handleDeleteThumbnail(variantIndex: number) {
     setColorVariants((prevVariants) =>
-      prevVariants.map((value, i) =>
-        i === variantIndex ? { ...value, thumbnail: "" } : value,
-      ),
-    );
+      prevVariants.map((value, i) => (i === variantIndex ? { ...value, thumbnail: "" } : value)),
+    )
   }
 
   function handleDeleteOthers(variantIndex: number, imageIndex: number) {
     setColorVariants((prevVariant) =>
       prevVariant.map((value, i) => ({
         ...value,
-        others:
-          i === variantIndex
-            ? value.others.filter((_, index) => index !== imageIndex)
-            : [...value.others],
+        others: i === variantIndex ? value.others.filter((_, index) => index !== imageIndex) : [...value.others],
       })),
-    );
+    )
   }
 
   return (
@@ -36,24 +27,24 @@ const ImagePreview = ({
       <Image
         fill
         priority
-        className="bg-gray-200"
-        src={image}
+        className="bg-gray-200 rounded object-cover"
+        src={image || "/placeholder.svg"}
         alt="Product image"
         sizes="200px"
       />
       <button
         type="button"
-        className="absolute -right-3 top-0 z-50 rounded-full bg-red-500 p-1"
+        className="absolute -right-2 -top-2 z-50 rounded-full bg-red-500 p-1 hover:bg-red-600 transition-colors"
         onClick={() => {
           action === "thumbnail"
             ? handleDeleteThumbnail(variantIndex)
-            : handleDeleteOthers(variantIndex, imageIndex ?? 0);
+            : handleDeleteOthers(variantIndex, imageIndex ?? 0)
         }}
       >
-        <Trash2 className="text-white" size={15} />
+        <Trash2 className="text-white" size={12} />
       </button>
     </div>
-  );
-};
+  )
+}
 
-export default ImagePreview;
+export default ImagePreview
