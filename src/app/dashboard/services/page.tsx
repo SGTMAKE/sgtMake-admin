@@ -7,11 +7,11 @@ import { getServicesServer } from "@/lib/api/services/get-services"
 export const dynamic = "force-dynamic"
 export const revalidate = 0
 
+
 export default async function ServicesPageContainer() {
   // Fetch services data on the server
   const servicesData = await getServicesServer()
-  const services = servicesData.success ? servicesData.services : []
-
+  const services = servicesData || []
   return (
     <Nav>
       <div className="container mx-auto px-4 py-8">
