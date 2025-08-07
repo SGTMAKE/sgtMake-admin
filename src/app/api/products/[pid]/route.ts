@@ -13,30 +13,7 @@ async function deleteImage(publicId: string) {
   return cloudinary.api.delete_resources([publicId])
 }
 
-async function safeDeleteFolder(folderPath: string) {
-  try {
-    await cloudinary.api.delete_folder(folderPath)
-    return { success: true }
-  } catch (error: any) {
-    if (error.http_code === 404) {
-      console.log(`Folder ${folderPath} doesn't exist, skipping deletion`)
-      return { success: true, message: "Folder already deleted" }
-    }
-    throw error
-  }
-}
 
-async function folderExists(folderPath: string) {
-  try {
-    await cloudinary.api.sub_folders(folderPath)
-    return true
-  } catch (error: any) {
-    if (error.http_code === 404) {
-      return false
-    }
-    throw error
-  }
-}
 
 export async function GET(req: NextRequest, { params }: { params: { pid: string } }) {
   try {
@@ -132,24 +109,7 @@ export async function PUT(req: NextRequest, { params }: { params: { pid: string 
           let processedThumbnail = colorVariant.thumbnail
           const processedOthers = [...colorVariant.others]
 
-          // Process thumbnail if it's a new base64 image
-          if (colorVariant.thumbnail && colorVariant.thumbnail.startsWith("data:")) {
-            try {
-              const uploadResult = await uploadImage(colorVariant.thumbnail, data.slug, colorName, `${uid()}-thumb`)
-              processedThumbnail = uploadResult.secure_url
-
-              // Save to database
-              await db.image.create({
-                data: {
-                  productId: pid,
-                  imagePublicId: uploadResult.public_id,
-                  colorVariant: colorName,
-                },
-              })
-            } catch (error) {
-              console.error("Error uploading thumbnail:", error)
-            }
-          }
+          
 
           // Process other images if they're new base64 images
           const processedOtherImages = await Promise.all(
@@ -176,6 +136,24 @@ export async function PUT(req: NextRequest, { params }: { params: { pid: string 
               return imageUrl
             }),
           )
+          // Process thumbnail if it's a new base64 image
+          if (colorVariant.thumbnail && colorVariant.thumbnail.startsWith("data:")) {
+            try {
+              const uploadResult = await uploadImage(colorVariant.thumbnail, data.slug, colorName, `${uid()}-thumb`)
+              processedThumbnail = uploadResult.secure_url
+
+              // Save to database
+              await db.image.create({
+                data: {
+                  productId: pid,
+                  imagePublicId: uploadResult.public_id,
+                  colorVariant: colorName,
+                },
+              })
+            } catch (error) {
+              console.error("Error uploading thumbnail:", error)
+            }
+          }
 
           return {
             ...colorVariant,

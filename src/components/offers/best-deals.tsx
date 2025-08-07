@@ -26,7 +26,7 @@ const BestDeals = ({ deal }: { deal: BestDeal | null }) => {
         {dealData ? (
           <div className="grid grid-cols-1 gap-3 @lg:grid-cols-3">
             <Image
-              src={dealData.imageUrl}
+              src={process.env.NEXT_PUBLIC_IMAGE_URL+dealData.imageUrl}
               alt="Product image"
               className="aspect-video z-0"
             />

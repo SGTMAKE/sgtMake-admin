@@ -59,9 +59,9 @@ export async function POST(req: NextRequest) {
           title: result.data.title,
           url: result.data.url,
           imageUrl: response.find((image) => !image.public_id.endsWith("Sm"))!
-            .secure_url,
+            .public_id,
           imageUrlSm: response.find((image) => image.public_id.endsWith("Sm"))!
-            .secure_url,
+            .public_id,
         },
       });
 
@@ -100,17 +100,66 @@ export async function PUT(req: NextRequest) {
     const result = ZodHeroBannerSchema.safeParse(data.values);
 
     if (result.success) {
+      // Get current banner data to check for existing images
+      const currentBanner = await db.heroBanner.findUnique({
+        where: { id: data.id },
+        select: {
+          imageUrl: true,
+          imageUrlSm: true,
+        },
+      });
+
+      if (!currentBanner) {
+        return error400("Banner not found", {});
+      }
+
+      let updatedData: any = {
+        offerPrice: Number(data.values.offerPrice),
+        basePrice: Number(data.values.basePrice),
+        title: data.values.title,
+        description: data.values.description,
+        url: data.values.url,
+      };
+
+      // Check if main image needs to be updated
+      if (data.images.image.startsWith("data:")) {
+        // Delete old image if it exists
+        if (currentBanner.imageUrl) {
+          try {
+            await cloudinary.uploader.destroy(currentBanner.imageUrl);
+          } catch (error) {
+            console.error("Error deleting old main image:", error);
+          }
+        }
+
+        // Upload new image
+        const name = uid();
+        const response = await uploadBanner(data.images.image, "hero-banner", name);
+        updatedData.imageUrl = response.public_id;
+      }
+
+      // Check if small image needs to be updated
+      if (data.images.imageSm.startsWith("data:")) {
+        // Delete old small image if it exists
+        if (currentBanner.imageUrlSm) {
+          try {
+            await cloudinary.uploader.destroy(currentBanner.imageUrlSm);
+          } catch (error) {
+            console.error("Error deleting old small image:", error);
+          }
+        }
+
+        // Upload new small image
+        const name = uid();
+        const response = await uploadBanner(data.images.imageSm, "hero-banner", name + "Sm");
+        updatedData.imageUrlSm = response.public_id;
+      }
+
       const updatedResult = await db.heroBanner.update({
         where: {
           id: data.id,
         },
-        data: {
-          offerPrice: Number(data.values.offerPrice),
-          basePrice: Number(data.values.basePrice),
-          title: data.values.title,
-          description: data.values.description,
-          url: data.values.url,
-        },
+        data: updatedData,
       });
 
       return success200({ updatedResult });
@@ -119,10 +168,10 @@ export async function PUT(req: NextRequest) {
       return error400("Invalid data format.", {});
     }
   } catch (error) {
+    console.error("Hero banner update error:", error);
     return error500({});
   }
 }
-
 export async function DELETE(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -141,9 +190,21 @@ export async function DELETE(req: NextRequest) {
     if (!id || !publicId)
       return error400("Banner Id or Public Id missing or invalid", {});
 
+    const Banner = await db.heroBanner.findUnique({
+        where: { id: id },
+        select: {
+          imageUrl: true,
+          imageUrlSm: true,
+        },
+      });
+
+      if (!Banner) {
+        return error400("Banner not found", {});
+      }
+
     const promises = [
-      cloudinary.uploader.destroy(`hero-banner/${publicId}`),
-      cloudinary.uploader.destroy(`hero-banner/${publicId}Sm`),
+      cloudinary.uploader.destroy(`${Banner.imageUrl}`),
+      cloudinary.uploader.destroy(`${Banner.imageUrlSm}`),
       db.heroBanner.delete({
         where: {
           id: id,

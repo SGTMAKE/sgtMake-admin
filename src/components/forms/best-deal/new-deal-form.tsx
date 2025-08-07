@@ -177,7 +177,7 @@ const NewDealForm = ({
         <div className="relative w-full">
           {image ? (
             <>
-              <Image src={image} alt="" className="aspect-video" />
+              <Image src={image.startsWith("data:")?image:process.env.NEXT_PUBLIC_IMAGE_URL+image} alt="" className="aspect-video" />
               <Button
                 isIconOnly
                 size="sm"

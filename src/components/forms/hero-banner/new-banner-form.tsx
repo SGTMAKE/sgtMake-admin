@@ -187,7 +187,7 @@ const NewBannerForm = ({
           </span>
           {image ? (
             <>
-              <Image src={image} alt="" className="aspect-video" />
+              <Image src={image.startsWith("data:")?image:process.env.NEXT_PUBLIC_IMAGE_URL+image} alt="" className="aspect-video" />
               <Button
                 isIconOnly
                 size="sm"
@@ -209,7 +209,7 @@ const NewBannerForm = ({
           </span>
           {imageSm ? (
             <>
-              <Image src={imageSm} alt="" className="aspect-square" />
+              <Image src={image.startsWith("data:")?image:process.env.NEXT_PUBLIC_IMAGE_URL+imageSm} alt="" className="aspect-square" />
               <Button
                 isIconOnly
                 size="sm"

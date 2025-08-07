@@ -34,7 +34,7 @@ const ImagePreview = ({ image, variantIndex, imageIndex, action }: ImagePreviewP
       />
       <button
         type="button"
-        className="absolute -right-2 -top-2 z-50 rounded-full bg-red-500 p-1 hover:bg-red-600 transition-colors"
+        className="absolute -right-2 -top-2  rounded-full bg-red-500 p-1 hover:bg-red-600 transition-colors"
         onClick={() => {
           action === "thumbnail"
             ? handleDeleteThumbnail(variantIndex)

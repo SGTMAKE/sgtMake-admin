@@ -113,7 +113,7 @@ export default function HeroBannerTable({
           return (
             <User
               avatarProps={{
-                src: banner.imageUrlSm,
+                src: process.env.NEXT_PUBLIC_IMAGE_URL+banner.imageUrlSm,
               }}
               name=""
             />
@@ -129,7 +129,7 @@ export default function HeroBannerTable({
               <DeleteHeroBanner
                 id={banner.id}
                 setBannerData={setBannerData}
-                publicId={banner.imageUrl.split(".").at(-2)!.split("/").at(-1)!}
+                publicId={"banner.imageUrl"}
               />
             </div>
           );

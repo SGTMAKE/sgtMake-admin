@@ -9,7 +9,6 @@ export const revalidate = 0
 
 export async function GET() {
   try {
-    // Check authentication (uncomment if you have auth implemented)
     const session = await getServerSession(authOptions);
     if (!session) {
       return NextResponse.json(
@@ -29,7 +28,14 @@ export async function GET() {
       {
         success: true,
         services,
-      }
+      },
+      {
+        headers: {
+          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+          Pragma: "no-cache",
+          Expires: "0",
+        },
+      },
     )
   } catch (error) {
     console.error("Error fetching services:", error)
@@ -37,6 +43,11 @@ export async function GET() {
       { success: false, message: "Failed to fetch services" },
       {
         status: 500,
+        headers: {
+          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+          Pragma: "no-cache",
+          Expires: "0",
+        },
       },
     )
   }

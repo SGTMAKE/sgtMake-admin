@@ -197,7 +197,7 @@ const EditBannerForm = ({
           </span>
           {image ? (
             <>
-              <Image src={image} alt="" className="aspect-video" />
+              <Image src={image.startsWith("data:")?image:process.env.NEXT_PUBLIC_IMAGE_URL+image} alt="" className="aspect-video" />
               <Button
                 isIconOnly
                 size="sm"
@@ -219,7 +219,7 @@ const EditBannerForm = ({
           </span>
           {imageSm ? (
             <>
-              <Image src={imageSm} alt="" className="aspect-square" />
+              <Image src={imageSm.startsWith("data:")?imageSm:process.env.NEXT_PUBLIC_IMAGE_URL+imageSm} alt="" className="aspect-square" />
               <Button
                 isIconOnly
                 size="sm"
