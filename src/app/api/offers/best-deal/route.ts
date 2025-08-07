@@ -47,6 +47,7 @@ export async function POST(req: NextRequest) {
           imageUrl: response.public_id,
         },
       });
+      console.log( "New best deal created:", newDeal);
 
       return success200({ newDeal });
     }
@@ -55,6 +56,7 @@ export async function POST(req: NextRequest) {
       return error400("Invalid data format.", {});
     }
   } catch (error) {
+    console.log(error)
     return error500({});
   }
 }
@@ -133,7 +135,7 @@ export async function PUT(req: NextRequest) {
       return error400("Invalid data format.", {});
     }
   } catch (error) {
-    console.error("Best deal update error:", error);
+    console.log("Best deal update error:", error);
     return error500({});
   }
 }
@@ -178,7 +180,7 @@ export async function DELETE(req: NextRequest) {
 
     return success200({});
   } catch (error) {
-    console.error("Best deal deletion error:", error);
+    console.log("Best deal deletion error:", error);
     return error500({});
   }
 }

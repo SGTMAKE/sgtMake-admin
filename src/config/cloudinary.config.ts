@@ -29,7 +29,7 @@ export const uploadBanner = (
 ) => {
   return cloudinary.uploader.upload(image, {
     folder,
-    public_id: folder === "banner" ? "best-deal" : name,
+    public_id: folder === "banner" ? `best-deal-${uid()}` : name,
   });
 };
 

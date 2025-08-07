@@ -125,6 +125,7 @@ export async function PUT(req: NextRequest) {
       if (data.images.image.startsWith("data:")) {
         // Delete old image if it exists
         if (currentBanner.imageUrl) {
+          console.log("Deleting old main image:", currentBanner.imageUrl);
           try {
             await cloudinary.uploader.destroy(currentBanner.imageUrl);
           } catch (error) {
@@ -143,6 +144,7 @@ export async function PUT(req: NextRequest) {
         // Delete old small image if it exists
         if (currentBanner.imageUrlSm) {
           try {
+            console.log("Deleting old main image:", currentBanner.imageUrl);
             await cloudinary.uploader.destroy(currentBanner.imageUrlSm);
           } catch (error) {
             console.error("Error deleting old small image:", error);

@@ -102,7 +102,6 @@ export async function POST(req: NextRequest) {
       ]);
 
       const response = await Promise.all(promises);
-      console.log(response)
 
       const product = await db.product.create({
         data: {

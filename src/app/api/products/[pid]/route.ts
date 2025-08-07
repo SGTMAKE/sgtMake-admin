@@ -345,7 +345,6 @@ export async function PUT(req: NextRequest, { params }: { params: { pid: string 
       return error400("Invalid data format.", { errors: result.error.errors })
     }
   } catch (error) {
-    console.error("Product update error:", error)
     return error500({})
   }
 }
