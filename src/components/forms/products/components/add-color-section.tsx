@@ -105,8 +105,10 @@ const AddColorSection = ({ variant, index, form, setDisable }: AddColorSectionPr
               </div>
               {form.getValues("slug") !== "" && variant.color !== "" ? (
                 <ImagePicker variant={variant} variantIndex={index} action="others" />
+              ) : pathname.endsWith("edit") ? (
+                ""
               ) : (
-               pathname.endsWith("edit") ? "" : <Button
+                <Button
                   isIconOnly
                   aria-label="disable"
                   variant="flat"

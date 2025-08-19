@@ -1,26 +1,21 @@
-import { useCategoryEndChild } from "@/api-hooks/categories/get-end-child";
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import TiptapEditor from "@/components/ui/tiptap-editor";
-import { ProductFormProps } from "@/lib/types/types";
-import { Button, Input, Select, SelectItem, Textarea } from "@nextui-org/react";
+"use client"
 
+import { useCategoryEndChild } from "@/api-hooks/categories/get-end-child"
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import TiptapEditor from "@/components/ui/tiptap-editor";
+import type { ProductFormProps } from "@/lib/types/types"
+import { Button, Input, Select, SelectItem } from "@nextui-org/react"
 
 const ProductDetails = ({ form }: ProductFormProps) => {
   function generateSlug() {
-    const name = form.getValues("title");
+    const name = form.getValues("title")
     if (name) {
-      const slug = name.replaceAll(" ", "-").toLowerCase();
-      form.setValue("slug", slug);
+      const slug = name.replaceAll(" ", "-").toLowerCase()
+      form.setValue("slug", slug)
     }
   }
 
-  const { data: categories } = useCategoryEndChild();
+  const { data: categories } = useCategoryEndChild()
   return (
     <div className="flex-1 p-5 pe-3">
       <FormField
@@ -39,8 +34,7 @@ const ProductDetails = ({ form }: ProductFormProps) => {
                 radius="sm"
                 classNames={{
                   label: "font-medium z-0",
-                  inputWrapper:
-                    "border border-slate-200 bg-gray-50 dark:border-zinc-800 dark:bg-zinc-800/50",
+                  inputWrapper: "border border-slate-200 bg-gray-50 dark:border-zinc-800 dark:bg-zinc-800/50",
                 }}
               />
             </FormControl>
@@ -65,8 +59,7 @@ const ProductDetails = ({ form }: ProductFormProps) => {
                   radius="sm"
                   classNames={{
                     label: "font-medium z-0",
-                    inputWrapper:
-                      "border border-slate-200 bg-gray-50 dark:border-zinc-800 dark:bg-zinc-800/50",
+                    inputWrapper: "border border-slate-200 bg-gray-50 dark:border-zinc-800 dark:bg-zinc-800/50",
                   }}
                 />
                 <Button type="button" onClick={generateSlug}>
@@ -93,8 +86,7 @@ const ProductDetails = ({ form }: ProductFormProps) => {
                 radius="sm"
                 classNames={{
                   label: "font-medium z-0",
-                  inputWrapper:
-                    "border border-slate-200 bg-gray-50 dark:border-zinc-800 dark:bg-zinc-800/50",
+                  inputWrapper: "border border-slate-200 bg-gray-50 dark:border-zinc-800 dark:bg-zinc-800/50",
                 }}
               />
             </FormControl>
@@ -102,7 +94,7 @@ const ProductDetails = ({ form }: ProductFormProps) => {
           </FormItem>
         )}
       />
-      <FormField
+     <FormField
         control={form.control}
         name="description"
         render={({ field }) => (
@@ -118,7 +110,7 @@ const ProductDetails = ({ form }: ProductFormProps) => {
           </FormItem>
         )}
       />
-     
+
       <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
         <FormField
           control={form.control}
@@ -174,8 +166,7 @@ const ProductDetails = ({ form }: ProductFormProps) => {
                   radius="sm"
                   classNames={{
                     label: "font-medium z-0",
-                    inputWrapper:
-                      "border border-slate-200 bg-gray-50 dark:border-zinc-800 dark:bg-zinc-800/50",
+                    inputWrapper: "border border-slate-200 bg-gray-50 dark:border-zinc-800 dark:bg-zinc-800/50",
                   }}
                 />
               </FormControl>
@@ -204,8 +195,7 @@ const ProductDetails = ({ form }: ProductFormProps) => {
                     classNames={{
                       label: "font-medium capitalize z-0",
                       input: "placeholder:capitalize",
-                      inputWrapper:
-                        "border border-slate-200 bg-gray-50 dark:border-zinc-800 dark:bg-zinc-800/50",
+                      inputWrapper: "border border-slate-200 bg-gray-50 dark:border-zinc-800 dark:bg-zinc-800/50",
                     }}
                   />
                 </FormControl>
@@ -216,7 +206,7 @@ const ProductDetails = ({ form }: ProductFormProps) => {
         ))}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default ProductDetails;
+export default ProductDetails

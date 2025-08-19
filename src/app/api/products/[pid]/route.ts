@@ -1,4 +1,4 @@
-import { cloudinary, uploadImage } from "@/config/cloudinary.config"
+import { cloudinary } from "@/config/cloudinary.config"
 import { authOptions } from "@/lib/auth"
 import { db } from "@/lib/prisma"
 import { error400, error401, error403, error500, success200 } from "@/lib/utils"
@@ -6,14 +6,20 @@ import { ZodProductSchema } from "@/lib/zod-schemas/schema"
 import { getServerSession } from "next-auth"
 import type { NextRequest } from "next/server"
 import type { z } from "zod"
-import { uid } from "uid"
+
+// Helpers
+function isDataUri(v?: string | null): v is string {
+  return !!v && v.startsWith("data:")
+}
 
 // Function to delete a single image by public_id
 async function deleteImage(publicId: string) {
-  return cloudinary.api.delete_resources([publicId])
+  try {
+    await cloudinary.uploader.destroy(publicId)
+  } catch (e) {
+    console.warn("Cloudinary destroy error:", e)
+  }
 }
-
-
 
 export async function GET(req: NextRequest, { params }: { params: { pid: string } }) {
   try {
@@ -47,10 +53,21 @@ export async function GET(req: NextRequest, { params }: { params: { pid: string 
 
     return success200({ product })
   } catch (error) {
+    console.error("GET /api/products/[pid] error:", error)
     return error500({})
   }
 }
 
+/**
+ * PUT: Edit product with smart color change handling and client-side uploads
+ *
+ * Key improvements:
+ * - Expects public_ids from client-side uploads (no server-side uploading)
+ * - Track color renames by index position and update DB records instead of deleting
+ * - Only delete images that are truly removed from the payload
+ * - Preserve existing images when colors are renamed
+ * - Maintain proper sequence for different color sections
+ */
 export async function PUT(req: NextRequest, { params }: { params: { pid: string } }) {
   try {
     const session = await getServerSession(authOptions)
@@ -74,6 +91,10 @@ export async function PUT(req: NextRequest, { params }: { params: { pid: string 
     }
     const result = ZodProductSchema.safeParse(data)
 
+    if (!result.success) {
+      return error400("Invalid data format.", { errors: result.error.errors })
+    }
+
     const dbProduct = await db.product.findUnique({
       where: {
         id: pid,
@@ -91,260 +112,219 @@ export async function PUT(req: NextRequest, { params }: { params: { pid: string 
       return error400("Cannot edit a deleted product", {})
     }
 
-    if (result.success) {
-      // Get current colors and new colors
-      const currentColors = dbProduct.color ? dbProduct.color.split(",") : []
-      const newColors = data.colors.map((colorObj) => colorObj.color).filter(Boolean)
+    // Get current and new colors
+    const previousColors = dbProduct.color ? dbProduct.color.split(",") : []
+    const incomingColors = data.colors.map((c) => c.color).filter(Boolean)
 
-      // Check if slug or colors have changed
-      const isSlugChanged = dbProduct.slug !== data.slug
-      const isColorsChanged = JSON.stringify(currentColors.sort()) !== JSON.stringify(newColors.sort())
+    const isSlugChanged = dbProduct.slug !== data.slug
 
-      // Handle image processing for new/updated images
-      const processedColors = await Promise.all(
-        data.colors.map(async (colorVariant, index) => {
-          const colorName = colorVariant.color
-          if (!colorName) return colorVariant
+    // 1) Track color changes by index position to identify renames vs additions/removals
+    const colorChanges: Array<{ from: string; to: string; index: number }> = []
+    const minLen = Math.min(previousColors.length, incomingColors.length)
 
-          let processedThumbnail = colorVariant.thumbnail
-          const processedOthers = [...colorVariant.others]
+    for (let i = 0; i < minLen; i++) {
+      const from = previousColors[i]
+      const to = incomingColors[i]
+      if (from && to && from !== to) {
+        colorChanges.push({ from, to, index: i })
+      }
+    }
 
-          
+    // 2) Apply color renames in database (update colorVariant, don't delete images)
+    for (const change of colorChanges) {
+      await db.image.updateMany({
+        where: {
+          productId: pid,
+          colorVariant: change.from,
+        },
+        data: {
+          colorVariant: change.to,
+        },
+      })
+    }
 
-          // Process other images if they're new base64 images
-          const processedOtherImages = await Promise.all(
-            colorVariant.others.map(async (imageUrl, imgIndex) => {
-              if (imageUrl.startsWith("data:")) {
-                try {
-                  const uploadResult = await  uploadImage(imageUrl, data.slug, colorName, uid())
+    // 3) Load all existing images after color updates
+    const existingImages = await db.image.findMany({
+      where: { productId: pid },
+      select: { id: true, imagePublicId: true, colorVariant: true },
+    })
 
-                  // Save to database
-                  await db.image.create({
-                    data: {
-                      productId: pid,
-                      imagePublicId: uploadResult.public_id,
-                      colorVariant: colorName,
-                    },
-                  })
+    const findExistingByPublicId = (publicId: string) => existingImages.find((img) => img.imagePublicId === publicId)
 
-                  return uploadResult.secure_url
-                } catch (error) {
-                  console.error("Error uploading other image:", error)
-                  return imageUrl
-                }
-              }
-              return imageUrl
-            }),
-          )
-          // Process thumbnail if it's a new base64 image
-          if (colorVariant.thumbnail && colorVariant.thumbnail.startsWith("data:")) {
-            try {
-              const uploadResult = await uploadImage(colorVariant.thumbnail, data.slug, colorName, `${uid()}-thumb`)
-              processedThumbnail = uploadResult.secure_url
+    // Track all public_ids that should remain after processing
+    const desiredPublicIds = new Set<string>()
 
-              // Save to database
-              await db.image.create({
-                data: {
-                  productId: pid,
-                  imagePublicId: uploadResult.public_id,
-                  colorVariant: colorName,
-                },
+    // 4) Process each color variant - maintain sequence
+    const processedColors = await Promise.all(
+      data.colors.map(async (variant, variantIndex) => {
+        const colorName = variant.color
+        if (!colorName) {
+          return { color: "", others: [], thumbnail: "" }
+        }
+
+        const finalOthersPublicIds: string[] = []
+
+        // Process "others" images in sequence
+        for (let i = 0; i < variant.others.length; i++) {
+          const publicId = variant.others[i]
+          desiredPublicIds.add(publicId)
+          finalOthersPublicIds.push(publicId)
+
+          // Create or update image record
+          const existing = findExistingByPublicId(publicId)
+          if (existing) {
+            // Update existing record if color changed
+            if (existing.colorVariant !== colorName) {
+              await db.image.update({
+                where: { id: existing.id },
+                data: { colorVariant: colorName },
               })
-            } catch (error) {
-              console.error("Error uploading thumbnail:", error)
+              existing.colorVariant = colorName
             }
+          } else {
+            // Create new image record
+            const created = await db.image.create({
+              data: {
+                productId: pid,
+                imagePublicId: publicId,
+                colorVariant: colorName,
+              },
+              select: { id: true, imagePublicId: true, colorVariant: true },
+            })
+            existingImages.push(created)
           }
+        }
 
-          return {
-            ...colorVariant,
-            thumbnail: processedThumbnail,
-            others: processedOtherImages,
+        // Process thumbnail
+        let finalThumbPublicId: string | null = null
+        if (variant.thumbnail) {
+          const publicId = variant.thumbnail
+          desiredPublicIds.add(publicId)
+          finalThumbPublicId = publicId
+
+          // Create or update thumbnail record
+          const existing = findExistingByPublicId(publicId)
+          if (existing) {
+            if (existing.colorVariant !== colorName) {
+              await db.image.update({
+                where: { id: existing.id },
+                data: { colorVariant: colorName },
+              })
+              existing.colorVariant = colorName
+            }
+          } else {
+            const created = await db.image.create({
+              data: {
+                productId: pid,
+                imagePublicId: publicId,
+                colorVariant: colorName,
+              },
+              select: { id: true, imagePublicId: true, colorVariant: true },
+            })
+            existingImages.push(created)
           }
+        }
+
+        return {
+          color: colorName,
+          others: finalOthersPublicIds,
+          thumbnail: finalThumbPublicId ?? "",
+        }
+      }),
+    )
+
+    // 5) Delete only images that are truly removed (not in desired set)
+    const allCurrentImages = await db.image.findMany({
+      where: { productId: pid },
+      select: { id: true, imagePublicId: true },
+    })
+
+    const imagesToDelete = allCurrentImages.filter((img) => !desiredPublicIds.has(img.imagePublicId))
+
+    await Promise.all(
+      imagesToDelete.map(async (img) => {
+        await deleteImage(img.imagePublicId)
+        await db.image.delete({ where: { id: img.id } })
+      }),
+    )
+
+    // 6) Handle slug changes - rename assets and update DB
+    if (isSlugChanged) {
+      const resources = await cloudinary.api.resources({
+        type: "upload",
+        prefix: `products/${dbProduct.slug}/`,
+        max_results: 500,
+      })
+
+      // Rename assets in Cloudinary
+      await Promise.all(
+        resources.resources.map((resource: any) => {
+          const oldId: string = resource.public_id
+          const newId = `products/${data.slug}/${oldId.split("/").slice(2).join("/")}`
+          if (oldId === newId) return Promise.resolve()
+          return cloudinary.uploader.rename(oldId, newId)
         }),
       )
 
-      // Handle color and slug changes
-      if (isSlugChanged && isColorsChanged) {
-        console.log("Both slug and colors changed")
+      // Update DB imagePublicIds
+      const dbImages = await db.image.findMany({
+        where: {
+          productId: pid,
+          imagePublicId: { contains: dbProduct.slug },
+        },
+        select: { id: true, imagePublicId: true },
+      })
 
-        const removedColors = currentColors.filter((color) => !newColors.includes(color))
-        const addedColors = newColors.filter((color) => !currentColors.includes(color))
-
-        const resources = await cloudinary.api.resources({
-          type: "upload",
-          prefix: `products/${dbProduct.slug}/`,
-          max_results: 500,
-        })
-
-        // Delete images of removed colors
-        for (const removedColor of removedColors) {
-          const colorImages = resources.resources.filter(
-            (resource: any) =>
-              resource.public_id.includes(`/${removedColor}/`) ||
-              resource.public_id.includes(`-${removedColor}-`) ||
-              resource.public_id.endsWith(`-${removedColor}`),
-          )
-
-          if (colorImages.length > 0) {
-            await Promise.all(colorImages.map((img: any) => deleteImage(img.public_id)))
-            await db.image.deleteMany({
-              where: {
-                productId: pid,
-                colorVariant: removedColor,
-              },
-            })
-          }
-        }
-
-        // Move remaining images to new slug path
-        const remainingImages = resources.resources.filter((resource: any) => {
-          return !removedColors.some(
-            (color) =>
-              resource.public_id.includes(`/${color}/`) ||
-              resource.public_id.includes(`-${color}-`) ||
-              resource.public_id.endsWith(`-${color}`),
-          )
-        })
-
-        await Promise.all(
-          remainingImages.map((resource: any) => {
-            const publicId: string = resource.public_id
-            const pathParts = publicId.split("/")
-
-            const newPublicId =
-              pathParts.length > 2
-                ? `products/${data.slug}/${pathParts.slice(2).join("/")}`
-                : `products/${data.slug}/${pathParts.at(-1)?.replace(dbProduct.slug, data.slug)}`
-
-            return cloudinary.uploader.rename(publicId, newPublicId)
+      await Promise.all(
+        dbImages.map((img) =>
+          db.image.update({
+            where: { id: img.id },
+            data: {
+              imagePublicId: img.imagePublicId.replace(dbProduct.slug, data.slug),
+            },
           }),
+        ),
+      )
+
+      // Update response public_ids too
+      for (const variant of processedColors as Array<{ color: string; others: string[]; thumbnail: string }>) {
+        variant.others = variant.others.map((p) =>
+          p.includes(dbProduct.slug) ? p.replace(dbProduct.slug, data.slug) : p,
         )
-
-        // Update imagePublicId in DB for remaining images
-        const dbImages = await db.image.findMany({
-          where: {
-            productId: pid,
-            imagePublicId: {
-              contains: dbProduct.slug,
-            },
-            NOT: {
-              colorVariant: {
-                in: removedColors,
-              },
-            },
-          },
-        })
-
-        await Promise.all(
-          dbImages.map((img) =>
-            db.image.update({
-              where: { id: img.id },
-              data: {
-                imagePublicId: img.imagePublicId.replace(dbProduct.slug, data.slug),
-              },
-            }),
-          ),
-        )
-
-      } else if (isSlugChanged) {
-        console.log("Only slug changed")
-
-        const resources = await cloudinary.api.resources({
-          type: "upload",
-          prefix: `products/${dbProduct.slug}/`,
-          max_results: 500,
-        })
-
-        await Promise.all(
-          resources.resources.map((resource: any) => {
-            const publicId: string = resource.public_id
-            const newPublicId = `products/${data.slug}/${publicId.split("/").slice(2).join("/")}`
-            return cloudinary.uploader.rename(publicId, newPublicId)
-          }),
-        )
-
-        const images = await db.image.findMany({
-          where: {
-            productId: pid,
-            imagePublicId: {
-              contains: dbProduct.slug,
-            },
-          },
-        })
-
-        await Promise.all(
-          images.map((img) =>
-            db.image.update({
-              where: { id: img.id },
-              data: {
-                imagePublicId: img.imagePublicId.replace(dbProduct.slug, data.slug),
-              },
-            }),
-          ),
-        )
-
-      } else if (isColorsChanged) {
-        console.log("Only colors changed")
-
-        const removedColors = currentColors.filter((color) => !newColors.includes(color))
-
-        const resources = await cloudinary.api.resources({
-          type: "upload",
-          prefix: `products/${dbProduct.slug}/`,
-          max_results: 500,
-        })
-
-        for (const removedColor of removedColors) {
-          const colorImages = resources.resources.filter(
-            (resource: any) =>
-              resource.public_id.includes(`/${removedColor}/`) ||
-              resource.public_id.includes(`-${removedColor}-`) ||
-              resource.public_id.endsWith(`-${removedColor}`),
-          )
-
-          if (colorImages.length > 0) {
-            await Promise.all(colorImages.map((img: any) => deleteImage(img.public_id)))
-            await db.image.deleteMany({
-              where: {
-                productId: pid,
-                colorVariant: removedColor,
-              },
-            })
-          }
+        if (variant.thumbnail) {
+          variant.thumbnail = variant.thumbnail.includes(dbProduct.slug)
+            ? variant.thumbnail.replace(dbProduct.slug, data.slug)
+            : variant.thumbnail
         }
       }
-
-      // Update product in database
-      await db.product.update({
-        where: {
-          id: pid,
-        },
-        data: {
-          title: data.title,
-          slug: data.slug,
-          shortDescription: data.shortDescription === "" ? null : data.shortDescription,
-          description: data.description,
-          basePrice: Number.parseInt(data.basePrice),
-          offerPrice: Number.parseInt(data.offerPrice),
-          stock: Number.parseInt(data.stock),
-          categoryId: data.categoryId,
-          color: newColors.length > 0 ? newColors.join(",") : null,
-          variantName: data.variantName,
-          variantValues: data.variantValues?.replace(/\s/g, ""),
-          keywords: data.keywords.replace(/\s/g, "").split(","),
-        },
-      })
-
-      return success200({
-        message: "Product updated successfully",
-        processedColors: processedColors,
-      })
     }
 
-    if (result.error) {
-      return error400("Invalid data format.", { errors: result.error.errors })
-    }
+    // 7) Update product fields
+    await db.product.update({
+      where: { id: pid },
+      data: {
+        title: data.title,
+        slug: data.slug,
+        shortDescription: data.shortDescription === "" ? null : data.shortDescription,
+        description: data.description,
+        basePrice: Number.parseInt(data.basePrice),
+        offerPrice: Number.parseInt(data.offerPrice),
+        stock: Number.parseInt(data.stock),
+        categoryId: data.categoryId,
+        color: incomingColors.length > 0 ? incomingColors.join(",") : null,
+        variantName: data.variantName,
+        variantValues: data.variantValues?.replace(/\s/g, ""),
+        keywords: data.keywords.replace(/\s/g, "").split(","),
+      },
+    })
+
+    return success200({
+      message: "Product updated successfully",
+      processedColors,
+      colorChanges, // Track what colors were renamed
+    })
   } catch (error) {
+    console.error("PUT /api/products/[pid] error:", error)
     return error500({})
   }
 }
@@ -384,13 +364,11 @@ export async function DELETE(req: NextRequest, { params }: { params: { pid: stri
       const result = await cloudinary.api.resources({
         type: "upload",
         prefix: `products/${dbProduct.slug}/`,
+        max_results: 500,
       })
 
-      const deletePromises: Promise<any>[] = result.resources.map((resource: any) => deleteImage(resource.public_id))
-
-      deletePromises.push(db.product.delete({ where: { id: pid } }))
-
-      await Promise.all(deletePromises)
+      await Promise.all(result.resources.map((resource: any) => deleteImage(resource.public_id)))
+      await db.product.delete({ where: { id: pid } })
 
       return success200({ message: "Product permanently deleted." })
     } else {
