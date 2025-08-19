@@ -1,11 +1,13 @@
-
+"use client"
 import { useGlobalContext } from "@/context/store"
 import type { ImagePreviewProps } from "@/lib/types/types"
 import { Trash2 } from "lucide-react"
 import Image from "next/image"
+import { usePathname } from "next/navigation"
 
 const ImagePreview = ({ image, variantIndex, imageIndex, action }: ImagePreviewProps) => {
   const { setColorVariants } = useGlobalContext()
+  const pathname = usePathname()
 
   function handleDeleteThumbnail(variantIndex: number) {
     setColorVariants((prevVariants) =>
@@ -32,7 +34,7 @@ const ImagePreview = ({ image, variantIndex, imageIndex, action }: ImagePreviewP
         alt="Product image"
         sizes="200px"
       />
-      <button
+      {pathname.endsWith("edit") ? "" : <button
         type="button"
         className="absolute -right-2 -top-2  rounded-full bg-red-500 p-1 hover:bg-red-600 transition-colors"
         onClick={() => {
@@ -42,7 +44,7 @@ const ImagePreview = ({ image, variantIndex, imageIndex, action }: ImagePreviewP
         }}
       >
         <Trash2 className="text-white" size={12} />
-      </button>
+      </button>}
     </div>
   )
 }

@@ -9,6 +9,7 @@ import { Button } from "@nextui-org/button"
 import { Tooltip } from "@nextui-org/tooltip"
 import { Input } from "@nextui-org/input"
 import ImagePicker from "@/components/dialog/products/image-picker"
+import { usePathname } from "next/navigation"
 
 const AddColorSection = ({ variant, index, form, setDisable }: AddColorSectionProps) => {
   const { colorVariants, setColorVariants } = useGlobalContext()
@@ -27,6 +28,8 @@ const AddColorSection = ({ variant, index, form, setDisable }: AddColorSectionPr
       setColorVariants((prevVariant) => prevVariant.filter((_, i) => i !== index))
     }
   }
+
+  const pathname = usePathname()
 
   return (
     <div className="mt-3 border-b border-gray-200 pb-4 last:border-b-0">
@@ -103,7 +106,7 @@ const AddColorSection = ({ variant, index, form, setDisable }: AddColorSectionPr
               {form.getValues("slug") !== "" && variant.color !== "" ? (
                 <ImagePicker variant={variant} variantIndex={index} action="others" />
               ) : (
-                <Button
+               pathname.endsWith("edit") ? "" : <Button
                   isIconOnly
                   aria-label="disable"
                   variant="flat"
