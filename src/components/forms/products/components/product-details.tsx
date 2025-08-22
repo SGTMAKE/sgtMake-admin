@@ -2,7 +2,6 @@
 
 import { useCategoryEndChild } from "@/api-hooks/categories/get-end-child"
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import TiptapEditor from "@/components/ui/tiptap-editor";
 import type { ProductFormProps } from "@/lib/types/types"
 import { Button, Input, Select, SelectItem } from "@nextui-org/react"
 import Editor from '@/components/editor/editor'
