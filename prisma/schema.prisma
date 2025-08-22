@@ -126,6 +126,7 @@ model Image {
   productId     String  @db.ObjectId
   Product       Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   colorVariant  String
+  sequence    Int?
 
   @@unique([productId, id])
 }

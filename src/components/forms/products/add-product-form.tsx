@@ -11,7 +11,7 @@ import ProductDetails from "./components/product-details"
 import ProductOptions from "./components/product-options"
 import { useGlobalContext } from "@/context/store"
 import { useAddProduct } from "@/api-hooks/products/add-product"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
 // Client-side Cloudinary upload function
 async function uploadToCloudinary(file: File, slug: string, color: string, uniqueId: string): Promise<string> {
@@ -19,6 +19,7 @@ async function uploadToCloudinary(file: File, slug: string, color: string, uniqu
   formData.append("file", file)
   formData.append("upload_preset", process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!)
   formData.append("public_id", `${slug}/${color}/${uniqueId}`)
+  formData.append("folder", `products`)
 
   const response = await fetch(
     `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
@@ -71,16 +72,28 @@ const AddProductForm = () => {
       keywords: "",
     },
   })
+  useEffect(() => {
+      setColorVariants([{ color: "", thumbnail: "", others: [] }])
+  }, [colorVariants.length, setColorVariants])
+
+  // Initialize with one empty color variant
+  useEffect(() => {
+    if (colorVariants.length === 0) {
+      setColorVariants([{ color: "", thumbnail: "", others: [] }])
+    }
+  }, [colorVariants.length, setColorVariants])
 
   const onSuccess = () => {
     toast.success("Product added successfully.")
     form.reset()
-    setColorVariants([])
+    setColorVariants([{ color: "", thumbnail: "", others: [] }])
     setIsUploading(false)
   }
 
-
-  
+  const onError = () => {
+    toast.error("Failed to add product.")
+    setIsUploading(false)
+  }
 
   const add_product_mutation = useAddProduct(onSuccess)
 
@@ -92,19 +105,19 @@ const AddProductForm = () => {
         colorVariants.map(async (variant, colorIndex) => {
           if (!variant.color) return variant
 
-          const processedOthers: string[] = []
+          const processedOthers: Array<{ publicId: string; sequence: number }> = []
           let processedThumbnail = ""
 
-          // Upload "others" images in sequence
+          // Upload "others" images in sequence with proper ordering
           for (let i = 0; i < variant.others.length; i++) {
             const imageData = variant.others[i]
             if (imageData.startsWith("data:")) {
               const file = dataURItoFile(imageData, `other-${i}.jpg`)
               const publicId = await uploadToCloudinary(file, values.slug, variant.color, `${Date.now()}-${i}`)
-              processedOthers.push(publicId)
+              processedOthers.push({ publicId, sequence: i })
             } else {
               // Already a public_id
-              processedOthers.push(imageData)
+              processedOthers.push({ publicId: imageData, sequence: i })
             }
           }
 
@@ -121,14 +134,21 @@ const AddProductForm = () => {
             color: variant.color,
             others: processedOthers,
             thumbnail: processedThumbnail,
+            colorSequence: colorIndex, // Track color variant sequence
           }
         }),
       )
 
-      // Update form with processed colors containing public_ids
+      // Update form with processed colors containing public_ids and sequences
       const updatedValues = {
         ...values,
-        colors: processedColors,
+        colors: processedColors.map((variant) => ({
+          color: variant.color,
+          thumbnail: variant.thumbnail,
+          others: Array.isArray(variant.others)
+            ? variant.others.map((img: any) => typeof img === "string" ? img : img.publicId)
+            : [],
+        })),
       }
 
       add_product_mutation.mutate(updatedValues)

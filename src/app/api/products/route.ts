@@ -84,10 +84,11 @@ export async function POST(req: NextRequest) {
 
     if (result.success) {
       // Create image records from public_ids (images already uploaded client-side)
-      const imageRecords = data.colors.flatMap((color) => [
+      const imageRecords = data.colors.flatMap((color,ind) => [
         ...color.others.map((publicId) => ({
           imagePublicId: publicId,
           colorVariant: color.color,
+          sequence: ind,
         })),
         ...(color.thumbnail
           ? [

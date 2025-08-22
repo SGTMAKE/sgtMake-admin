@@ -5,7 +5,37 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/comp
 import TiptapEditor from "@/components/ui/tiptap-editor";
 import type { ProductFormProps } from "@/lib/types/types"
 import { Button, Input, Select, SelectItem } from "@nextui-org/react"
+import Editor from '@/components/editor/editor'
+import { generateJSON } from "@tiptap/core"
+import { defaultExtensions } from "@/components/editor/extensions"
+import {
+  slashCommand,
+} from '@/components/editor/slash-command'
 
+export const defaultEditorContent = {
+  type: 'doc',
+  content: [
+    {
+      type: 'paragraph',
+      content: []
+    }
+  ]
+}
+
+const extensions = [...defaultExtensions, slashCommand]
+
+const htmlToJson = (html: string) => {
+  return generateJSON(html, defaultExtensions)
+}
+export const defaultValue = {
+  type: 'doc',
+  content: [
+    {
+      type: 'paragraph',
+      content: []
+    }
+  ]
+}
 const ProductDetails = ({ form }: ProductFormProps) => {
   function generateSlug() {
     const name = form.getValues("title")
@@ -14,6 +44,7 @@ const ProductDetails = ({ form }: ProductFormProps) => {
       form.setValue("slug", slug)
     }
   }
+  
 
   const { data: categories } = useCategoryEndChild()
   return (
@@ -101,10 +132,9 @@ const ProductDetails = ({ form }: ProductFormProps) => {
           <FormItem className="mt-3">
             <FormLabel>Product Description</FormLabel>
             <FormControl>
-              <TiptapEditor content={field.value}
-                onChange={field.onChange}
-                placeholder="Write a detailed product description..."
-                className="min-h-[300px]"/>
+              <Editor initialValue={typeof field.value === "string"
+      ? generateJSON(field.value, extensions) // convert HTML → JSON
+      : field.value || defaultEditorContent} onChange={field.onChange} />
             </FormControl>
             <FormMessage />
           </FormItem>
